@@ -53,7 +53,7 @@ describe('slack', () => {
         mockery.disable();
     });
 
-    describe('notifier listens to server emits', () => {
+    describe('slacker posts message to channels', () => {
         beforeEach(() => {
             configMock = {
                 token: 'y353e5y45'
