@@ -81,7 +81,7 @@ class SlackNotifier extends NotificationBase {
         }
         const pipelineLink = buildData.buildLink.split('/builds')[0];
         const message = `<${pipelineLink}|${buildData.jobName}> *${buildData.status}*`;
-        const attachment = [
+        const attachments = [
             {
                 fallback: '',
                 color: COLOR_MAP[buildData.status],
@@ -96,7 +96,7 @@ class SlackNotifier extends NotificationBase {
         ];
         const slackMessage = {
             message,
-            attachment
+            attachments
         };
 
         slacker(this.config.token, buildData.settings.slack.channels, slackMessage);
