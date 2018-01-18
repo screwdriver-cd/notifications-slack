@@ -1,7 +1,7 @@
 'use strict';
 
 const hoek = require('hoek');
-const WebClient = require('@slack/client');
+const { WebClient } = require('@slack/client');
 
 let web;
 
@@ -36,7 +36,7 @@ function postMessage(channelName, payload) {
             }
 
             return web.chat.postMessage(id, payload.message, {
-                as_true: true,
+                as_user: true,
                 attachments: payload.attachments
             });
         })

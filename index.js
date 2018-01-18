@@ -80,7 +80,7 @@ class SlackNotifier extends NotificationBase {
             return;
         }
         const pipelineLink = buildData.buildLink.split('/builds')[0];
-        const message = `<${pipelineLink}|${buildData.jobName}> *${buildData.status}*`;
+        const message = `<${pipelineLink}|${buildData.pipelineName}#${buildData.jobName}> *${buildData.status}*`;
         const attachments = [
             {
                 fallback: '',
