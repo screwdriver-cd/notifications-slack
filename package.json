@@ -1,6 +1,6 @@
 {
-  "name": "screwdriver-notification-slacks",
-  "version": "0.0.1",
+  "name": "screwdriver-notifications-slack",
+  "version": "2.0.0",
   "description": "Sends slack notifications on certain build events",
   "main": "index.js",
   "scripts": {
@@ -10,9 +10,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:screwdriver-cd/notification-slacks.git"
+    "url": "git@github.com:screwdriver-cd/notifications-slack.git"
   },
-  "homepage": "https://github.com/screwdriver-cd/notification-slacks",
+  "homepage": "https://github.com/screwdriver-cd/notifications-slack",
   "bugs": "https://github.com/screwdriver-cd/screwdriver/issues",
   "keywords": [
     "screwdriver",
@@ -23,13 +23,10 @@
   "contributors": [
     "Dao Lam <daolam112@gmail.com>",
     "Darren Matsumoto <aeneascorrupt@gmail.com>",
-    "Ian Fox <ianfox97@gmail.com>",
-    "Jeremiah Wuenschel <jeremiah.wuenschel@gmail.com>",
     "Jithin Emmanuel <jithin1987@gmail.com>",
-    "Joel Sequeira <joelseq96@gmail.com>",
     "Min Zhang <minzhangcmu@gmail.com>",
     "Peter Peterson <jedipetey@gmail.com>",
-    "Reetika Rastogi <r3rastogi@gmail.com>",
+    "Philip Scott <pscott@zeptohost.com>",
     "St. John Johnson <st.john.johnson@gmail.com",
     "Tiffany Kyi <tiffanykyi@gmail.com>"
   ],
