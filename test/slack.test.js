@@ -37,7 +37,9 @@ describe('slack', () => {
                 postMessage: sinon.stub().resolves({})
             }
         };
-        WebClientConstructorMock = sinon.stub().returns(WebClientMock);
+        WebClientConstructorMock = {
+            WebClient: sinon.stub().returns(WebClientMock)
+        };
         mockery.registerMock('@slack/client', WebClientConstructorMock);
 
         // eslint-disable-next-line global-require
@@ -68,7 +70,7 @@ describe('slack', () => {
         it('do not create client again if there is one', () =>
             slacker(configMock.token, channels, payload)
                 .then(slacker(configMock.token, channels, payload))
-                .then(assert.calledOnce(WebClientConstructorMock))
+                .then(assert.calledOnce(WebClientConstructorMock.WebClient))
         );
 
         it('gets correct channel ids and post message to channels', () =>
@@ -76,7 +78,7 @@ describe('slack', () => {
                 assert.calledTwice(WebClientMock.channels.list);
                 assert.calledOnce(WebClientMock.chat.postMessage);
                 assert.calledWith(WebClientMock.chat.postMessage, '23', payload.message, {
-                    as_true: true,
+                    as_user: true,
                     attachments: payload.attachments
                 });
             })

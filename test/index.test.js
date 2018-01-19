@@ -38,7 +38,10 @@ describe('index', () => {
                 postMessage: sinon.stub().resolves('fffff')
             }
         };
-        WebClientConstructorMock = sinon.stub().returns(WebClientMock);
+
+        WebClientConstructorMock = {
+            WebClient: sinon.stub().returns(WebClientMock)
+        };
         mockery.registerMock('@slack/client', WebClientConstructorMock);
 
         // eslint-disable-next-line global-require
@@ -82,7 +85,7 @@ describe('index', () => {
             serverMock.emit(eventMock, buildDataMock);
 
             process.nextTick(() => {
-                assert.calledWith(WebClientConstructorMock, configMock.token);
+                assert.calledWith(WebClientConstructorMock.WebClient, configMock.token);
                 assert.calledThrice(WebClientMock.channels.list);
                 done();
             });
@@ -108,7 +111,7 @@ describe('index', () => {
             serverMock.emit(eventMock, buildDataMockUnincluded);
 
             process.nextTick(() => {
-                assert.notCalled(WebClientConstructorMock);
+                assert.notCalled(WebClientConstructorMock.WebClient);
                 done();
             });
         });
@@ -129,7 +132,7 @@ describe('index', () => {
             serverMock.emit(eventMock, buildDataMockUnincluded);
 
             process.nextTick(() => {
-                assert.notCalled(WebClientConstructorMock);
+                assert.notCalled(WebClientConstructorMock.WebClient);
                 done();
             });
         });
@@ -189,7 +192,7 @@ describe('index', () => {
             serverMock.emit(eventMock, buildDataMock);
 
             process.nextTick(() => {
-                assert.calledWith(WebClientConstructorMock, configMock.token);
+                assert.calledWith(WebClientConstructorMock.WebClient, configMock.token);
                 done();
             });
         });
@@ -238,7 +241,7 @@ describe('index', () => {
             serverMock.emit(eventMock, buildDataMock);
 
             process.nextTick(() => {
-                assert.notCalled(WebClientConstructorMock);
+                assert.notCalled(WebClientConstructorMock.WebClient);
                 done();
             });
         });
@@ -250,7 +253,7 @@ describe('index', () => {
             serverMock.emit(eventMock, buildDataMock);
 
             process.nextTick(() => {
-                assert.notCalled(WebClientConstructorMock);
+                assert.notCalled(WebClientConstructorMock.WebClient);
                 done();
             });
         });
@@ -263,7 +266,7 @@ describe('index', () => {
             serverMock.emit(eventMock, buildDataMockInvalid);
 
             process.nextTick(() => {
-                assert.notCalled(WebClientConstructorMock);
+                assert.notCalled(WebClientConstructorMock.WebClient);
                 done();
             });
         });

@@ -80,6 +80,8 @@ class SlackNotifier extends NotificationBase {
             return;
         }
         const pipelineLink = buildData.buildLink.split('/builds')[0];
+
+        // eslint-disable-next-line max-len
         const message = `<${pipelineLink}|${buildData.pipelineName}#${buildData.jobName}> *${buildData.status}*`;
         const attachments = [
             {
