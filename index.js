@@ -65,6 +65,9 @@ class SlackNotifier extends NotificationBase {
         } catch (e) {
             return;
         }
+        if (Object.keys(buildData.settings).length === 0) {
+            return;
+        }
         if (typeof buildData.settings.slack === 'string' ||
             Array.isArray(buildData.settings.slack)) {
             buildData.settings.slack = (typeof buildData.settings.slack === 'string')
