@@ -37,7 +37,7 @@
     "jenkins-mocha": "^4.0.0"
   },
   "dependencies": {
-    "@slack/client": "^3.15.0",
+    "@slack/client": "^4.0.0",
     "hapi": "^16.0.0",
     "hoek": "^5.0.2",
     "joi": "^13.1.0",
