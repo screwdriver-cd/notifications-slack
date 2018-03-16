@@ -77,7 +77,9 @@ describe('slack', () => {
             slacker(configMock.token, channels, payload).then(() => {
                 assert.calledTwice(WebClientMock.channels.list);
                 assert.calledOnce(WebClientMock.chat.postMessage);
-                assert.calledWith(WebClientMock.chat.postMessage, '23', payload.message, {
+                assert.calledWith(WebClientMock.chat.postMessage, {
+                    channel: '23',
+                    text: payload.message,
                     as_user: true,
                     attachments: payload.attachments
                 });

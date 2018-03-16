@@ -35,7 +35,9 @@ function postMessage(channelName, payload) {
                 throw new Error(`Channel ID not found for: ${channelName}`);
             }
 
-            return web.chat.postMessage(id, payload.message, {
+            return web.chat.postMessage({
+                channel: id,
+                text: payload.message,
                 as_user: true,
                 attachments: payload.attachments
             });
