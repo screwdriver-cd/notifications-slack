@@ -81,8 +81,8 @@ describe('index', () => {
 
         it('verifies that included status creates slack notifier', (done) => {
             serverMock.event(eventMock);
-            serverMock.on(eventMock, data => notifier.notify(data));
-            serverMock.emit(eventMock, buildDataMock);
+            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.emit(eventMock, buildDataMock);
 
             process.nextTick(() => {
                 assert.calledWith(WebClientConstructorMock.WebClient, configMock.token);
@@ -107,8 +107,8 @@ describe('index', () => {
             };
 
             serverMock.event(eventMock);
-            serverMock.on(eventMock, data => notifier.notify(data));
-            serverMock.emit(eventMock, buildDataMockUnincluded);
+            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.emit(eventMock, buildDataMockUnincluded);
 
             process.nextTick(() => {
                 assert.notCalled(WebClientConstructorMock.WebClient);
@@ -128,8 +128,8 @@ describe('index', () => {
             };
 
             serverMock.event(eventMock);
-            serverMock.on(eventMock, data => notifier.notify(data));
-            serverMock.emit(eventMock, buildDataMockUnincluded);
+            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.emit(eventMock, buildDataMockUnincluded);
 
             process.nextTick(() => {
                 assert.notCalled(WebClientConstructorMock.WebClient);
@@ -150,8 +150,8 @@ describe('index', () => {
             };
 
             serverMock.event(eventMock);
-            serverMock.on(eventMock, data => notifier.notify(data));
-            serverMock.emit(eventMock, buildDataMockSimple);
+            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.emit(eventMock, buildDataMockSimple);
 
             process.nextTick(() => {
                 assert.calledOnce(WebClientMock.channels.list);
@@ -172,8 +172,8 @@ describe('index', () => {
             };
 
             serverMock.event(eventMock);
-            serverMock.on(eventMock, data => notifier.notify(data));
-            serverMock.emit(eventMock, buildDataMockArray);
+            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.emit(eventMock, buildDataMockArray);
 
             process.nextTick(() => {
                 assert.calledTwice(WebClientMock.channels.list);
@@ -188,11 +188,24 @@ describe('index', () => {
             };
 
             serverMock.event(eventMock);
-            serverMock.on(eventMock, data => notifier.notify(data));
-            serverMock.emit(eventMock, buildDataMock);
+            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.emit(eventMock, buildDataMock);
 
             process.nextTick(() => {
                 assert.calledWith(WebClientConstructorMock.WebClient, configMock.token);
+                done();
+            });
+        });
+
+        it('returns when buildData.settings is empty', (done) => {
+            delete buildDataMock.settings.slack;
+
+            serverMock.event(eventMock);
+            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.emit(eventMock, buildDataMock);
+
+            process.nextTick(() => {
+                assert.notCalled(WebClientConstructorMock.WebClient);
                 done();
             });
         });
@@ -237,8 +250,8 @@ describe('index', () => {
         it('validates status', (done) => {
             buildDataMock.status = 22;
             serverMock.event(eventMock);
-            serverMock.on(eventMock, data => notifier.notify(data));
-            serverMock.emit(eventMock, buildDataMock);
+            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.emit(eventMock, buildDataMock);
 
             process.nextTick(() => {
                 assert.notCalled(WebClientConstructorMock.WebClient);
@@ -249,8 +262,8 @@ describe('index', () => {
         it('validates slack settings', (done) => {
             buildDataMock.settings.slack = { room: 'wrongKey' };
             serverMock.event(eventMock);
-            serverMock.on(eventMock, data => notifier.notify(data));
-            serverMock.emit(eventMock, buildDataMock);
+            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.emit(eventMock, buildDataMock);
 
             process.nextTick(() => {
                 assert.notCalled(WebClientConstructorMock.WebClient);
@@ -262,8 +275,8 @@ describe('index', () => {
             const buildDataMockInvalid = ['this', 'is', 'wrong'];
 
             serverMock.event(eventMock);
-            serverMock.on(eventMock, data => notifier.notify(data));
-            serverMock.emit(eventMock, buildDataMockInvalid);
+            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.emit(eventMock, buildDataMockInvalid);
 
             process.nextTick(() => {
                 assert.notCalled(WebClientConstructorMock.WebClient);
