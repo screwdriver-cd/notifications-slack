@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "@slack/client": "^4.0.0",
-    "hapi": "^16.0.0",
+    "hapi": "^17.0.0",
     "hoek": "^5.0.2",
     "joi": "^13.1.0",
     "mockery": "^2.1.0",
