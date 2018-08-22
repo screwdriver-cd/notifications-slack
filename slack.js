@@ -55,7 +55,13 @@ function postMessage(channelName, payload) {
  */
 function slacker(token, channels, payload) {
     if (!web) {
-        web = new WebClient(token);
+        web = new WebClient(token, {
+            retryConfig: {
+                retries: 5,
+                factor: 3.86,
+                maxRetryTime: 30 * 60 * 1000 // Set maximum time to 30 min that the retried operation is allowed to run
+            }
+        });
     }
 
     return Promise.all(channels.map(channelName => postMessage(channelName, payload)));
