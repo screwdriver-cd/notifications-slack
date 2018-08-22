@@ -86,7 +86,7 @@ describe('index', () => {
 
             process.nextTick(() => {
                 assert.calledWith(WebClientConstructorMock.WebClient, configMock.token);
-                assert.calledThrice(WebClientMock.channels.list);
+                assert.calledThrice(WebClientMock.chat.postMessage);
                 done();
             });
         });
@@ -116,7 +116,7 @@ describe('index', () => {
             });
         });
 
-        it('verifies that non-subscribed status does not send a notifcation', (done) => {
+        it('verifies that non-subscribed status does not send a notification', (done) => {
             const buildDataMockUnincluded = {
                 settings: {
                     slack: {
@@ -154,7 +154,7 @@ describe('index', () => {
             serverMock.events.emit(eventMock, buildDataMockSimple);
 
             process.nextTick(() => {
-                assert.calledOnce(WebClientMock.channels.list);
+                assert.calledOnce(WebClientMock.chat.postMessage);
                 done();
             });
         });
@@ -176,7 +176,7 @@ describe('index', () => {
             serverMock.events.emit(eventMock, buildDataMockArray);
 
             process.nextTick(() => {
-                assert.calledTwice(WebClientMock.channels.list);
+                assert.calledTwice(WebClientMock.chat.postMessage);
                 done();
             });
         });
