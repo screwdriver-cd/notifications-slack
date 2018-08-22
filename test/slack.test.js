@@ -67,7 +67,7 @@ describe('slack', () => {
             };
         });
 
-        it('do not create client again if there is one', () =>
+        it('does not create client again if there is one', () =>
             slacker(configMock.token, channels, payload)
                 .then(slacker(configMock.token, channels, payload))
                 .then(assert.calledOnce(WebClientConstructorMock.WebClient))
@@ -75,15 +75,31 @@ describe('slack', () => {
 
         it('gets correct channel ids and post message to channels', () =>
             slacker(configMock.token, channels, payload).then(() => {
-                assert.calledTwice(WebClientMock.channels.list);
-                assert.calledOnce(WebClientMock.chat.postMessage);
-                assert.calledWith(WebClientMock.chat.postMessage, {
-                    channel: '23',
+                assert.calledTwice(WebClientMock.chat.postMessage);
+                assert.calledWith(WebClientMock.chat.postMessage.firstCall, {
+                    channel: 'meeseeks',
+                    text: payload.message,
+                    as_user: true,
+                    attachments: payload.attachments
+                });
+                assert.calledWith(WebClientMock.chat.postMessage.secondCall, {
+                    channel: 'caaaandoooo',
                     text: payload.message,
                     as_user: true,
                     attachments: payload.attachments
                 });
             })
         );
+
+        it('logs an error if cannt post message to channels', () => {
+            WebClientMock.chat.postMessage.rejects(new Error('error!'));
+
+            return slacker(configMock.token, channels, payload).then(() => {
+                it('should catch an error', () => {
+                    // eslint-disable-next-line no-console
+                    assert.calledTwice(console.error);
+                });
+            });
+        });
     });
 });
