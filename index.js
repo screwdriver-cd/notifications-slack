@@ -40,7 +40,7 @@ const SCHEMA_BUILD_DATA = Joi.object()
         build: Joi.object().keys({
             id: Joi.number().integer().required()
         }).unknown(true),
-        event: Joi.object().required(),
+        event: Joi.object(),
         buildLink: Joi.string()
     });
 const SCHEMA_SLACK_CONFIG = Joi.object()
