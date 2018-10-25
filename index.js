@@ -27,13 +27,20 @@ const SCHEMA_SLACK_SETTINGS = Joi.object().keys({
         SCHEMA_SLACK_CHANNELS, SCHEMA_SLACK_CHANNEL
     )
 }).unknown(true);
+const SCHEMA_PIPELINE_DATA = Joi.object()
+    .keys({
+        scmRepo: Joi.object().keys({ name: Joi.string() }).required()
+    }).unknown(true);
 const SCHEMA_BUILD_DATA = Joi.object()
     .keys({
         settings: SCHEMA_SLACK_SETTINGS.required(),
         status: SCHEMA_STATUS.required(),
-        pipelineName: Joi.string(),
+        pipeline: SCHEMA_PIPELINE_DATA.required(),
         jobName: Joi.string(),
-        buildId: Joi.number().integer(),
+        build: Joi.object().keys({
+            id: Joi.number().integer().required()
+        }).unknown(true),
+        event: Joi.object(),
         buildLink: Joi.string()
     });
 const SCHEMA_SLACK_CONFIG = Joi.object()
@@ -85,7 +92,7 @@ class SlackNotifier extends NotificationBase {
         const pipelineLink = buildData.buildLink.split('/builds')[0];
 
         // eslint-disable-next-line max-len
-        const message = `<${pipelineLink}|${buildData.pipelineName}#${buildData.jobName}> *${buildData.status}*`;
+        const message = `<${pipelineLink}|${buildData.pipeline.scmRepo.name}#${buildData.jobName}> *${buildData.status}*`;
         const attachments = [
             {
                 fallback: '',
@@ -93,7 +100,7 @@ class SlackNotifier extends NotificationBase {
                 fields: [
                     {
                         title: 'Build',
-                        value: `<${buildData.buildLink}|#${buildData.buildId}>`,
+                        value: `<${buildData.buildLink}|#${buildData.build.id}>`,
                         short: true
                     }
                 ]
