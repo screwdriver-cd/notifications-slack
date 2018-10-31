@@ -27,9 +27,13 @@ const SCHEMA_SLACK_SETTINGS = Joi.object().keys({
         SCHEMA_SLACK_CHANNELS, SCHEMA_SLACK_CHANNEL
     )
 }).unknown(true);
+const SCHEMA_SCM_REPO = Joi.object()
+     .keys({
+         name: Joi.string().required()
+     }).unknown(true);
 const SCHEMA_PIPELINE_DATA = Joi.object()
     .keys({
-        scmRepo: Joi.object().keys({ name: Joi.string() }).required()
+        scmRepo: SCHEMA_SCM_REPO.required()
     }).unknown(true);
 const SCHEMA_BUILD_DATA = Joi.object()
     .keys({
