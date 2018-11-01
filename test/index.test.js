@@ -74,7 +74,8 @@ describe('index', () => {
                 pipeline: {
                     id: '123',
                     scmRepo: {
-                        name: 'screwdriver-cd/notifications'
+                        name: 'screwdriver-cd/notifications',
+                        url: 'http://scmtest/master'
                     }
                 },
                 jobName: 'publish',
