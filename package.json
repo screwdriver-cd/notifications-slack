@@ -34,7 +34,8 @@
     "chai": "^3.5.0",
     "eslint": "^4.19.1",
     "eslint-config-screwdriver": "^3.0.0",
-    "jenkins-mocha": "^6.0.0"
+    "jenkins-mocha": "^6.0.0",
+    "sinon": "^4.5.0"
   },
   "dependencies": {
     "@slack/client": "^4.3.1",
@@ -44,8 +45,7 @@
     "mockery": "^2.1.0",
     "request": "^2.87.0",
     "samsam": "^1.3.0",
-    "screwdriver-notifications-base": "^3.0.0",
-    "sinon": "^4.5.0"
+    "screwdriver-notifications-base": "^3.0.0"
   },
   "release": {
     "debug": false,
