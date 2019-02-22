@@ -12,6 +12,13 @@ const COLOR_MAP = {
     RUNNING: '#0F69FF',
     QUEUED: '#0F69FF'
 };
+const STATUSES_MAP = {
+    SUCCESS: ':sunny:',
+    FAILURE: ':umbrella:',
+    ABORTED: ':cloud:',
+    RUNNING: ':runner:',
+    QUEUED: ':cyclone:'
+};
 const DEFAULT_STATUSES = ['FAILURE'];
 const SCHEMA_STATUS = Joi.string().valid(Object.keys(COLOR_MAP));
 const SCHEMA_STATUSES = Joi.array()
@@ -94,17 +101,19 @@ class SlackNotifier extends NotificationBase {
             return;
         }
         const pipelineLink = buildData.buildLink.split('/builds')[0];
-
-        // eslint-disable-next-line max-len
-        const message = `<${pipelineLink}|${buildData.pipeline.scmRepo.name}#${buildData.jobName}> *${buildData.status}*`;
+        const truncatedSha = buildData.event.sha.slice(0, 6);
+        const message = `*${buildData.status}* ${STATUSES_MAP[buildData.status]}`;
         const attachments = [
             {
                 fallback: '',
                 color: COLOR_MAP[buildData.status],
                 fields: [
                     {
-                        title: 'Build',
-                        value: `<${buildData.buildLink}|#${buildData.build.id}>`,
+                        // eslint-disable-next-line max-len
+                        title: `<${pipelineLink}|${buildData.pipeline.scmRepo.name} ${buildData.jobName}> <${buildData.buildLink}|#${buildData.build.id}>`,
+                        // eslint-disable-next-line max-len
+                        value: `${buildData.event.commit.message} (${buildData.event.commit.url}|${truncatedSha}>)` +
+                                `\n${buildData.event.causeMessage}`,
                         short: true
                     }
                 ]

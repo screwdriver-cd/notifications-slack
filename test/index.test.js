@@ -87,7 +87,8 @@ describe('index', () => {
                     commit: {
                         author: { name: 'foo' },
                         message: 'fixing a bug'
-                    }
+                    },
+                    sha: '1234567890abcdeffedcba098765432100000000'
                 },
                 buildLink: 'http://thisisaSDtest.com/pipelines/12/builds/1234'
             };
@@ -132,7 +133,8 @@ describe('index', () => {
                     commit: {
                         author: { name: 'foo' },
                         message: 'fixing a bug'
-                    }
+                    },
+                    sha: '1234567890abcdeffedcba098765432100000000'
                 },
                 buildLink: 'http://thisisaSDtest.com/pipelines/12/builds/1234'
             };
@@ -191,7 +193,8 @@ describe('index', () => {
                     commit: {
                         author: { name: 'foo' },
                         message: 'fixing a bug'
-                    }
+                    },
+                    sha: '1234567890abcdeffedcba098765432100000000'
                 },
                 buildLink: 'http://thisisaSDtest.com/pipelines/12/builds/1234'
             };
@@ -229,7 +232,8 @@ describe('index', () => {
                     commit: {
                         author: { name: 'foo' },
                         message: 'fixing a bug'
-                    }
+                    },
+                    sha: '1234567890abcdeffedcba098765432100000000'
                 },
                 buildLink: 'http://thisisaSDtest.com/pipelines/12/builds/1234'
             };
@@ -318,7 +322,8 @@ describe('index', () => {
                     commit: {
                         author: { name: 'foo' },
                         message: 'fixing a bug'
-                    }
+                    },
+                    sha: '1234567890abcdeffedcba098765432100000000'
                 },
                 buildLink: 'http://thisisaSDtest.com/pipelines/12/builds/1234'
             };
