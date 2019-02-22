@@ -104,6 +104,10 @@ class SlackNotifier extends NotificationBase {
         const truncatedSha = buildData.event.sha.slice(0, 6);
         // eslint-disable-next-line max-len
         const message = `*${buildData.status}* ${STATUSES_MAP[buildData.status]} <${pipelineLink}|${buildData.pipeline.scmRepo.name} ${buildData.jobName}>`;
+        const cutOff = 150;
+        const commitMessage = buildData.event.commit.message.length > cutOff ?
+            `${buildData.event.commit.message.substring(0, cutOff)}...` :
+            buildData.event.commit.message;
         const attachments = [
             {
                 fallback: '',
@@ -111,7 +115,7 @@ class SlackNotifier extends NotificationBase {
                 title: `#${buildData.build.id}`,
                 title_link: `${buildData.buildLink}`,
                 // eslint-disable-next-line max-len
-                text: `${buildData.event.commit.message} (<${buildData.event.commit.url}|${truncatedSha}>)` +
+                text: `${commitMessage} (<${buildData.event.commit.url}|${truncatedSha}>)` +
                         `\n${buildData.event.causeMessage}`
             }
         ];
