@@ -12,6 +12,13 @@ const COLOR_MAP = {
     RUNNING: '#0F69FF',
     QUEUED: '#0F69FF'
 };
+const STATUSES_MAP = {
+    SUCCESS: ':sunny:',
+    FAILURE: ':umbrella:',
+    ABORTED: ':cloud:',
+    RUNNING: ':runner:',
+    QUEUED: ':cyclone:'
+};
 const DEFAULT_STATUSES = ['FAILURE'];
 const SCHEMA_STATUS = Joi.string().valid(Object.keys(COLOR_MAP));
 const SCHEMA_STATUSES = Joi.array()
@@ -23,7 +30,11 @@ const SCHEMA_SLACK_CHANNELS = Joi.array()
     .min(1);
 const SCHEMA_SLACK_SETTINGS = Joi.object().keys({
     slack: Joi.alternatives().try(
-        Joi.object().keys({ channels: SCHEMA_SLACK_CHANNELS, statuses: SCHEMA_STATUSES }),
+        Joi.object().keys({
+            channels: SCHEMA_SLACK_CHANNELS,
+            statuses: SCHEMA_STATUSES,
+            minimized: Joi.boolean()
+        }),
         SCHEMA_SLACK_CHANNELS, SCHEMA_SLACK_CHANNEL
     )
 }).unknown(true);
@@ -86,7 +97,8 @@ class SlackNotifier extends NotificationBase {
                 : buildData.settings.slack;
             buildData.settings.slack = {
                 channels: buildData.settings.slack,
-                statuses: DEFAULT_STATUSES
+                statuses: DEFAULT_STATUSES,
+                minimized: false
             };
         }
 
@@ -94,22 +106,42 @@ class SlackNotifier extends NotificationBase {
             return;
         }
         const pipelineLink = buildData.buildLink.split('/builds')[0];
-
-        // eslint-disable-next-line max-len
-        const message = `<${pipelineLink}|${buildData.pipeline.scmRepo.name}#${buildData.jobName}> *${buildData.status}*`;
-        const attachments = [
-            {
-                fallback: '',
-                color: COLOR_MAP[buildData.status],
-                fields: [
-                    {
-                        title: 'Build',
-                        value: `<${buildData.buildLink}|#${buildData.build.id}>`,
-                        short: true
-                    }
-                ]
-            }
-        ];
+        const truncatedSha = buildData.event.sha.slice(0, 6);
+        const cutOff = 150;
+        const commitMessage = buildData.event.commit.message.length > cutOff ?
+            `${buildData.event.commit.message.substring(0, cutOff)}...` :
+            buildData.event.commit.message;
+        const isMinimized = buildData.settings.slack.minimized;
+        const message = isMinimized ?
+            // eslint-disable-next-line max-len
+            `<${pipelineLink}|${buildData.pipeline.scmRepo.name}#${buildData.jobName}> *${buildData.status}*` :
+            // eslint-disable-next-line max-len
+            `*${buildData.status}* ${STATUSES_MAP[buildData.status]} <${pipelineLink}|${buildData.pipeline.scmRepo.name} ${buildData.jobName}>`;
+        const attachments = isMinimized ?
+            [
+                {
+                    fallback: '',
+                    color: COLOR_MAP[buildData.status],
+                    fields: [
+                        {
+                            title: 'Build',
+                            value: `<${buildData.buildLink}|#${buildData.build.id}>`,
+                            short: true
+                        }
+                    ]
+                }
+            ] :
+            [
+                {
+                    fallback: '',
+                    color: COLOR_MAP[buildData.status],
+                    title: `#${buildData.build.id}`,
+                    title_link: `${buildData.buildLink}`,
+                    // eslint-disable-next-line max-len
+                    text: `${commitMessage} (<${buildData.event.commit.url}|${truncatedSha}>)` +
+                            `\n${buildData.event.causeMessage}`
+                }
+            ];
         const slackMessage = {
             message,
             attachments
