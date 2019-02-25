@@ -344,7 +344,7 @@ describe('index', () => {
         });
 
         it('validates slack settings', (done) => {
-            buildDataMock.settings.slack = { room: 'wrongKey' };
+            buildDataMock.settings.slack = { room: 'wrongKey', minimized: true };
             serverMock.event(eventMock);
             serverMock.events.on(eventMock, data => notifier.notify(data));
             serverMock.events.emit(eventMock, buildDataMock);
