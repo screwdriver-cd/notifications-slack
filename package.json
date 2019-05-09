@@ -6,7 +6,9 @@
   "scripts": {
     "pretest": "eslint .",
     "test": "jenkins-mocha --recursive",
-    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
+    "semantic-release": "semantic-release pre && npm publish && semantic-release post",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "repository": {
     "type": "git",
@@ -45,12 +47,14 @@
     "mockery": "^2.1.0",
     "request": "^2.87.0",
     "samsam": "^1.3.0",
-    "screwdriver-notifications-base": "^3.0.0"
+    "screwdriver-notifications-base": "^3.0.0",
+    "snyk": "^1.163.0"
   },
   "release": {
     "debug": false,
     "verifyConditions": {
       "path": "./node_modules/semantic-release/src/lib/plugin-noop.js"
     }
-  }
+  },
+  "snyk": true
 }
