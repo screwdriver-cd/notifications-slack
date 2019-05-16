@@ -36,7 +36,7 @@ const SCHEMA_SLACK_SETTINGS = Joi.object().keys({
             minimized: Joi.boolean()
         }),
         SCHEMA_SLACK_CHANNELS, SCHEMA_SLACK_CHANNEL
-    )
+    ).required()
 }).unknown(true);
 const SCHEMA_SCM_REPO = Joi.object()
     .keys({
@@ -100,6 +100,9 @@ class SlackNotifier extends NotificationBase {
                 statuses: DEFAULT_STATUSES,
                 minimized: false
             };
+        }
+        if (buildData.settings.slack.statuses === undefined) {
+            buildData.settings.slack.statuses = DEFAULT_STATUSES;
         }
 
         if (!buildData.settings.slack.statuses.includes(buildData.status)) {
