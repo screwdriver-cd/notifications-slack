@@ -124,7 +124,7 @@ class SlackNotifier extends NotificationBase {
             `*${buildData.status}* ${STATUSES_MAP[buildData.status]} <${pipelineLink}|${buildData.pipeline.scmRepo.name} ${buildData.jobName}>`;
 
         const metaMessage = hoek.reach(buildData,
-            'build.meta.notification.message', { default: false });
+            'build.meta.notification.slack.message', { default: false });
 
         if (metaMessage) {
             message = `${message}\n${metaMessage}`;

@@ -267,7 +267,9 @@ describe('index', () => {
                     id: '1234',
                     meta: {
                         notification: {
-                            message: 'Hello!Meta!'
+                            slack: {
+                                message: 'Hello!Meta!'
+                            }
                         }
                     }
                 },
