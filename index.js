@@ -117,15 +117,17 @@ class SlackNotifier extends NotificationBase {
             buildData.event.commit.message;
         const isMinimized = buildData.settings.slack.minimized;
 
-        let message = hoek.reach(buildData,
+        let message = isMinimized ?
+            // eslint-disable-next-line max-len
+            `<${pipelineLink}|${buildData.pipeline.scmRepo.name}#${buildData.jobName}> *${buildData.status}*` :
+            // eslint-disable-next-line max-len
+            `*${buildData.status}* ${STATUSES_MAP[buildData.status]} <${pipelineLink}|${buildData.pipeline.scmRepo.name} ${buildData.jobName}>`;
+
+        const metaMessage = hoek.reach(buildData,
             'build.meta.notification.message', { default: false });
 
-        if (!message) {
-            message = isMinimized ?
-                // eslint-disable-next-line max-len
-                `<${pipelineLink}|${buildData.pipeline.scmRepo.name}#${buildData.jobName}> *${buildData.status}*` :
-                // eslint-disable-next-line max-len
-                `*${buildData.status}* ${STATUSES_MAP[buildData.status]} <${pipelineLink}|${buildData.pipeline.scmRepo.name} ${buildData.jobName}>`;
+        if (metaMessage) {
+            message = `${message}\n${metaMessage}`;
         }
 
         const attachments = isMinimized ?
