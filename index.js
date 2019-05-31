@@ -3,6 +3,7 @@
 const Joi = require('joi');
 const slacker = require('./slack');
 const NotificationBase = require('screwdriver-notifications-base');
+const hoek = require('hoek');
 
 const COLOR_MAP = {
     SUCCESS: 'good',
@@ -115,11 +116,20 @@ class SlackNotifier extends NotificationBase {
             `${buildData.event.commit.message.substring(0, cutOff)}...` :
             buildData.event.commit.message;
         const isMinimized = buildData.settings.slack.minimized;
-        const message = isMinimized ?
+
+        let message = isMinimized ?
             // eslint-disable-next-line max-len
             `<${pipelineLink}|${buildData.pipeline.scmRepo.name}#${buildData.jobName}> *${buildData.status}*` :
             // eslint-disable-next-line max-len
             `*${buildData.status}* ${STATUSES_MAP[buildData.status]} <${pipelineLink}|${buildData.pipeline.scmRepo.name} ${buildData.jobName}>`;
+
+        const metaMessage = hoek.reach(buildData,
+            'build.meta.notification.slack.message', { default: false });
+
+        if (metaMessage) {
+            message = `${message}\n${metaMessage}`;
+        }
+
         const attachments = isMinimized ?
             [
                 {
