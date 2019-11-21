@@ -5,20 +5,31 @@ const slacker = require('./slack');
 const NotificationBase = require('screwdriver-notifications-base');
 const hoek = require('hoek');
 
+// This should match what is in https://github.com/screwdriver-cd/data-schema/blob/master/models/build.js#L98
+// https://github.com/screwdriver-cd/ui/blob/master/app/styles/screwdriver-colors.scss
 const COLOR_MAP = {
-    SUCCESS: 'good',
-    FAILURE: 'danger',
     ABORTED: 'danger',
-    // https://github.com/screwdriver-cd/ui/blob/master/app/styles/screwdriver-colors.scss
+    CREATED: '#0b548c', // Using 'sd-info-fg' from https://github.com/screwdriver-cd/ui/blob/master/app/styles/screwdriver-colors.scss 
+    FAILURE: 'danger',
+    QUEUED: '#0F69FF',
     RUNNING: '#0F69FF',
-    QUEUED: '#0F69FF'
+    SUCCESS: 'good',
+    BLOCKED: '#ccc', // Using 'sd-light-gray' from https://github.com/screwdriver-cd/ui/blob/master/app/styles/screwdriver-colors.scss 
+    UNSTABLE: '#ffd333', // Using 'sd-unstable' from https://github.com/screwdriver-cd/ui/blob/master/app/styles/screwdriver-colors.scss 
+    COLLAPSED: '#f2f2f2', // New color. Light grey. 
+    FROZEN: '#acd9ff' // Using 'sd-frozen' from https://github.com/screwdriver-cd/ui/blob/master/app/styles/screwdriver-colors.scss 
 };
 const STATUSES_MAP = {
-    SUCCESS: ':sunny:',
-    FAILURE: ':umbrella:',
     ABORTED: ':cloud:',
+    CREATED: ':progress:',
+    FAILURE: ':umbrella:',
+    QUEUED: ':cyclone:',
     RUNNING: ':runner:',
-    QUEUED: ':cyclone:'
+    SUCCESS: ':sunny:',
+    BLOCKED: ':lock:',
+    UNSTABLE: ':foggy:',
+    COLLAPSED: ':arrow_up:',
+    FROZEN: ':snowman:'
 };
 const DEFAULT_STATUSES = ['FAILURE'];
 const SCHEMA_STATUS = Joi.string().valid(Object.keys(COLOR_MAP));
