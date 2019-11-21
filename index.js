@@ -9,15 +9,15 @@ const hoek = require('hoek');
 // https://github.com/screwdriver-cd/ui/blob/master/app/styles/screwdriver-colors.scss
 const COLOR_MAP = {
     ABORTED: 'danger',
-    CREATED: '#0b548c', // Using 'sd-info-fg' from https://github.com/screwdriver-cd/ui/blob/master/app/styles/screwdriver-colors.scss 
+    CREATED: '#0b548c', // Using 'sd-info-fg' from https://github.com/screwdriver-cd/ui/blob/master/app/styles/screwdriver-colors.scss
     FAILURE: 'danger',
     QUEUED: '#0F69FF',
     RUNNING: '#0F69FF',
     SUCCESS: 'good',
-    BLOCKED: '#ccc', // Using 'sd-light-gray' from https://github.com/screwdriver-cd/ui/blob/master/app/styles/screwdriver-colors.scss 
-    UNSTABLE: '#ffd333', // Using 'sd-unstable' from https://github.com/screwdriver-cd/ui/blob/master/app/styles/screwdriver-colors.scss 
-    COLLAPSED: '#f2f2f2', // New color. Light grey. 
-    FROZEN: '#acd9ff' // Using 'sd-frozen' from https://github.com/screwdriver-cd/ui/blob/master/app/styles/screwdriver-colors.scss 
+    BLOCKED: '#ccc', // Using 'sd-light-gray' from https://github.com/screwdriver-cd/ui/blob/master/app/styles/screwdriver-colors.scss
+    UNSTABLE: '#ffd333', // Using 'sd-unstable' from https://github.com/screwdriver-cd/ui/blob/master/app/styles/screwdriver-colors.scss
+    COLLAPSED: '#f2f2f2', // New color. Light grey.
+    FROZEN: '#acd9ff' // Using 'sd-frozen' from https://github.com/screwdriver-cd/ui/blob/master/app/styles/screwdriver-colors.scss
 };
 const STATUSES_MAP = {
     ABORTED: ':cloud:',
