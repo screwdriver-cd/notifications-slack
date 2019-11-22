@@ -21,7 +21,7 @@ const COLOR_MAP = {
 };
 const STATUSES_MAP = {
     ABORTED: ':cloud:',
-    CREATED: ':progress:',
+    CREATED: ':clock11:',
     FAILURE: ':umbrella:',
     QUEUED: ':cyclone:',
     RUNNING: ':runner:',
