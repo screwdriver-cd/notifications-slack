@@ -19,8 +19,8 @@ npm test
 
 Code licensed under the BSD 3-Clause license. See LICENSE file for terms.
 
-[npm-image]: https://img.shields.io/npm/v/screwdriver-notification-slacks.svg
-[npm-url]: https://npmjs.org/package/screwdriver-notification-slacks
+[npm-image]: https://img.shields.io/npm/v/screwdriver-notifications-slack
+[npm-url]: https://npmjs.org/package/screwdriver-notification-slack
 [downloads-image]: https://img.shields.io/npm/dt/screwdriver-notification-slacks.svg
 [license-image]: https://img.shields.io/npm/l/screwdriver-notification-slacks.svg
 [issues-image]: https://img.shields.io/github/issues/screwdriver-cd/notification-slacks.svg
