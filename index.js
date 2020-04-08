@@ -141,6 +141,14 @@ class SlackNotifier extends NotificationBase {
             message = `${message}\n${metaMessage}`;
         }
 
+        const metaVar = `build.meta.notification.slack.${buildData.jobName}.message`;
+
+        const buildMessage = hoek.reach(buildData, metaVar, { default: false });
+
+        // Job specific slack message takes precedence of generic slack message.
+        if (buildMessage) {
+            message = `${message}\n${buildMessage}`;
+        }
         const attachments = isMinimized ?
             [
                 {
