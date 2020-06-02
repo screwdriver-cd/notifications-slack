@@ -75,10 +75,6 @@ const SCHEMA_SLACK_CONFIG = Joi.object()
         token: Joi.string().required()
     });
 
-const validateConfigSlack =  (config) => {
-    return Joi.validate(config, SCHEMA_SLACK_SETTINGS);
-};
-
 class SlackNotifier extends NotificationBase {
     /**
     * Constructs an SlackNotifier
@@ -183,9 +179,10 @@ class SlackNotifier extends NotificationBase {
 
         slacker(this.config.token, buildData.settings.slack.channels, slackMessage);
     }
+
+    static validateConfigSlack(config) {
+        return Joi.validate(config, SCHEMA_SLACK_SETTINGS);
+    }
 }
 
-module.exports = {
-    SlackNotifier: SlackNotifier,
-    validateConfigSlack: validateConfigSlack
-};
+module.exports = SlackNotifier;
