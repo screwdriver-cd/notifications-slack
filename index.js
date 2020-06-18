@@ -179,6 +179,10 @@ class SlackNotifier extends NotificationBase {
 
         slacker(this.config.token, buildData.settings.slack.channels, slackMessage);
     }
+
+    static validateConfig(config) {
+        return Joi.validate(config, SCHEMA_SLACK_SETTINGS);
+    }
 }
 
 module.exports = SlackNotifier;
