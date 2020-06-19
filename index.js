@@ -102,6 +102,20 @@ class SlackNotifier extends NotificationBase {
         if (Object.keys(buildData.settings).length === 0) {
             return;
         }
+
+        // Slack channel overwrite from meta data
+        const metaDataSlackChannel = hoek.reach(buildData,
+            'build.meta.notification.slack.channels', { default: false });
+
+        if (metaDataSlackChannel) {
+            buildData.settings.slack = metaDataSlackChannel.split(',');
+            if (Array.isArray(buildData.settings.slack)) {
+                // Remove empty/blank items.
+                buildData.settings.slack = buildData.settings.slack.filter(
+                    x => (x.trim() !== (undefined || '')));
+            }
+        }
+        // Slack channels from configuration
         if (typeof buildData.settings.slack === 'string' ||
             Array.isArray(buildData.settings.slack)) {
             buildData.settings.slack = (typeof buildData.settings.slack === 'string')
