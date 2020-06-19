@@ -112,7 +112,7 @@ class SlackNotifier extends NotificationBase {
             if (Array.isArray(buildData.settings.slack)) {
                 // Remove empty/blank items.
                 buildData.settings.slack = buildData.settings.slack.filter(
-                    x => (x.trim() !== (undefined || '')));
+                    x => (x.trim() !== ('')));
             }
         }
         // Slack channels from configuration
