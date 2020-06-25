@@ -103,9 +103,10 @@ class SlackNotifier extends NotificationBase {
             return;
         }
 
-        // Slack channel overwrite from meta data
-        const metaDataSlackChannel = hoek.reach(buildData,
-            'build.meta.notification.slack.channels', { default: false });
+        // Slack channel overwrite from meta data. Job specific only.
+        const metaReplaceVar = `build.meta.notification.slack.${buildData.jobName}.channels`;
+
+        const metaDataSlackChannel = hoek.reach(buildData, metaReplaceVar, { default: false });
 
         if (metaDataSlackChannel) {
             buildData.settings.slack = metaDataSlackChannel.split(',');
