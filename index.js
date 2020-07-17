@@ -108,13 +108,13 @@ class SlackNotifier extends NotificationBase {
 
         const metaDataSlackChannel = hoek.reach(buildData, metaReplaceVar, { default: false });
 
+        let channelReplacement;
+
         if (metaDataSlackChannel) {
-            buildData.settings.slack = metaDataSlackChannel.split(',');
-            if (Array.isArray(buildData.settings.slack)) {
-                // Remove empty/blank items.
-                buildData.settings.slack = buildData.settings.slack.filter(
-                    x => (x.trim() !== ('')));
-            }
+            channelReplacement = metaDataSlackChannel.split(',');
+            // Remove empty/blank items.
+            channelReplacement = channelReplacement.filter(
+                x => (x.trim() !== ('')));
         }
         // Slack channels from configuration
         if (typeof buildData.settings.slack === 'string' ||
@@ -128,6 +128,10 @@ class SlackNotifier extends NotificationBase {
                 minimized: false
             };
         }
+        if (channelReplacement) {
+            buildData.settings.slack.channels = channelReplacement;
+        }
+
         if (buildData.settings.slack.statuses === undefined) {
             buildData.settings.slack.statuses = DEFAULT_STATUSES;
         }
