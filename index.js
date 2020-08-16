@@ -17,6 +17,7 @@ const COLOR_MAP = {
     BLOCKED: '#ccc', // Using 'sd-light-gray' from https://github.com/screwdriver-cd/ui/blob/master/app/styles/screwdriver-colors.scss
     UNSTABLE: '#ffd333', // Using 'sd-unstable' from https://github.com/screwdriver-cd/ui/blob/master/app/styles/screwdriver-colors.scss
     COLLAPSED: '#f2f2f2', // New color. Light grey.
+    FIXED: 'good',
     FROZEN: '#acd9ff' // Using 'sd-frozen' from https://github.com/screwdriver-cd/ui/blob/master/app/styles/screwdriver-colors.scss
 };
 const STATUSES_MAP = {
@@ -29,6 +30,7 @@ const STATUSES_MAP = {
     BLOCKED: ':lock:',
     UNSTABLE: ':foggy:',
     COLLAPSED: ':arrow_up:',
+    FIXED: ':sunny:',
     FROZEN: ':snowman:'
 };
 const DEFAULT_STATUSES = ['FAILURE'];
@@ -134,6 +136,10 @@ class SlackNotifier extends NotificationBase {
 
         if (buildData.settings.slack.statuses === undefined) {
             buildData.settings.slack.statuses = DEFAULT_STATUSES;
+        }
+
+        if (buildData.status === 'FIXED') {
+            buildData.settings.slack.statuses.push(buildData.status);
         }
 
         if (!buildData.settings.slack.statuses.includes(buildData.status)) {
