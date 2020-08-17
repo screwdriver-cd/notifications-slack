@@ -70,7 +70,8 @@ const SCHEMA_BUILD_DATA = Joi.object()
             id: Joi.number().integer().required()
         }).unknown(true),
         event: Joi.object(),
-        buildLink: Joi.string()
+        buildLink: Joi.string(),
+        isFixed: Joi.boolean()
     });
 const SCHEMA_SLACK_CONFIG = Joi.object()
     .keys({
@@ -138,10 +139,6 @@ class SlackNotifier extends NotificationBase {
             buildData.settings.slack.statuses = DEFAULT_STATUSES;
         }
 
-        if (buildData.status === 'FIXED') {
-            buildData.settings.slack.statuses.push(buildData.status);
-        }
-
         if (!buildData.settings.slack.statuses.includes(buildData.status)) {
             return;
         }
@@ -153,11 +150,17 @@ class SlackNotifier extends NotificationBase {
             buildData.event.commit.message;
         const isMinimized = buildData.settings.slack.minimized;
 
+        let notificationStatus = buildData.status;
+
+        if (buildData.status === 'SUCCESS' && buildData.isFixed) {
+            notificationStatus = 'FIXED';
+        }
+
         let message = isMinimized ?
             // eslint-disable-next-line max-len
             `<${pipelineLink}|${buildData.pipeline.scmRepo.name}#${buildData.jobName}> *${buildData.status}*` :
             // eslint-disable-next-line max-len
-            `*${buildData.status}* ${STATUSES_MAP[buildData.status]} <${pipelineLink}|${buildData.pipeline.scmRepo.name} ${buildData.jobName}>`;
+            `*${notificationStatus}* ${STATUSES_MAP[buildData.status]} <${pipelineLink}|${buildData.pipeline.scmRepo.name} ${buildData.jobName}>`;
 
         const metaMessage = hoek.reach(buildData,
             'build.meta.notification.slack.message', { default: false });

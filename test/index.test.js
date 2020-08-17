@@ -90,7 +90,8 @@ describe('index', () => {
                     },
                     sha: '1234567890abcdeffedcba098765432100000000'
                 },
-                buildLink: 'http://thisisaSDtest.com/pipelines/12/builds/1234'
+                buildLink: 'http://thisisaSDtest.com/pipelines/12/builds/1234',
+                isFixed: false
             };
             notifier = new SlackNotifier(configMock);
         });
@@ -98,6 +99,19 @@ describe('index', () => {
         it('verifies that included status creates slack notifier', (done) => {
             serverMock.event(eventMock);
             serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.emit(eventMock, buildDataMock);
+
+            process.nextTick(() => {
+                assert.calledWith(WebClientConstructorMock.WebClient, configMock.token);
+                assert.calledThrice(WebClientMock.chat.postMessage);
+                done();
+            });
+        });
+
+        it('when the build status is fixed, Overwrites the notification status title', (done) => {
+            serverMock.event(eventMock);
+            serverMock.events.on(eventMock, data => notifier.notify(data));
+            buildDataMock.isFixed = true;
             serverMock.events.emit(eventMock, buildDataMock);
 
             process.nextTick(() => {
@@ -269,52 +283,6 @@ describe('index', () => {
                         notification: {
                             slack: {
                                 message: 'Hello!Meta!'
-                            }
-                        }
-                    }
-                },
-                event: {
-                    id: '12345',
-                    causeMessage: 'Merge pull request #26 from screwdriver-cd/notifications',
-                    creator: { username: 'foo' },
-                    commit: {
-                        author: { name: 'foo' },
-                        message: 'fixing a bug'
-                    },
-                    sha: '1234567890abcdeffedcba098765432100000000'
-                },
-                buildLink: 'http://thisisaSDtest.com/pipelines/12/builds/1234'
-            };
-
-            serverMock.event(eventMock);
-            serverMock.events.on(eventMock, data => notifier.notify(data));
-            serverMock.events.emit(eventMock, buildDataMockSimple);
-
-            process.nextTick(() => {
-                assert.calledOnce(WebClientMock.chat.postMessage);
-                done();
-            });
-        });
-
-        it('verifies when the build status is FIXED', (done) => {
-            const buildDataMockSimple = {
-                settings: {
-                    slack: 'meeseeks'
-                },
-                status: 'FIXED',
-                pipeline: {
-                    id: '123',
-                    scmRepo: {
-                        name: 'screwdriver-cd/notifications'
-                    }
-                },
-                jobName: 'publish',
-                build: {
-                    id: '1234',
-                    meta: {
-                        notification: {
-                            slack: {
-                                message: 'Hello!FIXED'
                             }
                         }
                     }
