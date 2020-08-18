@@ -139,6 +139,11 @@ class SlackNotifier extends NotificationBase {
             buildData.settings.slack.statuses = DEFAULT_STATUSES;
         }
 
+        // Add for fixed notification
+        if (!buildData.settings.slack.statuses.includes('SUCCESS') && buildData.isFixed) {
+            buildData.settings.slack.statuses.push('SUCCESS');
+        }
+
         if (!buildData.settings.slack.statuses.includes(buildData.status)) {
             return;
         }
@@ -149,18 +154,21 @@ class SlackNotifier extends NotificationBase {
             `${buildData.event.commit.message.substring(0, cutOff)}...` :
             buildData.event.commit.message;
         const isMinimized = buildData.settings.slack.minimized;
-
+        
+        // When using multiple notification plugins,Do not change the `BuildData.status` directly 
         let notificationStatus = buildData.status;
 
-        if (buildData.status === 'SUCCESS' && buildData.isFixed) {
-            notificationStatus = 'FIXED';
+        if (buildData.settings.slack.statuses.includes('FAILURE')) {
+            if (buildData.status === 'SUCCESS' && buildData.isFixed) {
+                notificationStatus = 'FIXED';
+            }
         }
 
         let message = isMinimized ?
             // eslint-disable-next-line max-len
-            `<${pipelineLink}|${buildData.pipeline.scmRepo.name}#${buildData.jobName}> *${buildData.status}*` :
+            `<${pipelineLink}|${buildData.pipeline.scmRepo.name}#${buildData.jobName}> *${notificationStatus}*` :
             // eslint-disable-next-line max-len
-            `*${notificationStatus}* ${STATUSES_MAP[buildData.status]} <${pipelineLink}|${buildData.pipeline.scmRepo.name} ${buildData.jobName}>`;
+            `*${notificationStatus}* ${STATUSES_MAP[notificationStatus]} <${pipelineLink}|${buildData.pipeline.scmRepo.name} ${buildData.jobName}>`;
 
         const metaMessage = hoek.reach(buildData,
             'build.meta.notification.slack.message', { default: false });
@@ -179,7 +187,7 @@ class SlackNotifier extends NotificationBase {
             [
                 {
                     fallback: '',
-                    color: COLOR_MAP[buildData.status],
+                    color: COLOR_MAP[notificationStatus],
                     fields: [
                         {
                             title: 'Build',
@@ -192,7 +200,7 @@ class SlackNotifier extends NotificationBase {
             [
                 {
                     fallback: '',
-                    color: COLOR_MAP[buildData.status],
+                    color: COLOR_MAP[notificationStatus],
                     title: `#${buildData.build.id}`,
                     title_link: `${buildData.buildLink}`,
                     // eslint-disable-next-line max-len
