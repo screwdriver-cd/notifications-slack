@@ -154,8 +154,8 @@ class SlackNotifier extends NotificationBase {
             `${buildData.event.commit.message.substring(0, cutOff)}...` :
             buildData.event.commit.message;
         const isMinimized = buildData.settings.slack.minimized;
-        
-        // When using multiple notification plugins,Do not change the `buildData.status` directly 
+
+        // When using multiple notification plugins,Do not change the `buildData.status` directly
         let notificationStatus = buildData.status;
 
         if (buildData.settings.slack.statuses.includes('FAILURE')) {
