@@ -90,7 +90,8 @@ describe('index', () => {
                     },
                     sha: '1234567890abcdeffedcba098765432100000000'
                 },
-                buildLink: 'http://thisisaSDtest.com/pipelines/12/builds/1234'
+                buildLink: 'http://thisisaSDtest.com/pipelines/12/builds/1234',
+                isFixed: false
             };
             notifier = new SlackNotifier(configMock);
         });
@@ -98,6 +99,19 @@ describe('index', () => {
         it('verifies that included status creates slack notifier', (done) => {
             serverMock.event(eventMock);
             serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.emit(eventMock, buildDataMock);
+
+            process.nextTick(() => {
+                assert.calledWith(WebClientConstructorMock.WebClient, configMock.token);
+                assert.calledThrice(WebClientMock.chat.postMessage);
+                done();
+            });
+        });
+
+        it('when the build status is fixed, Overwrites the notification status title', (done) => {
+            serverMock.event(eventMock);
+            serverMock.events.on(eventMock, data => notifier.notify(data));
+            buildDataMock.isFixed = true;
             serverMock.events.emit(eventMock, buildDataMock);
 
             process.nextTick(() => {

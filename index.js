@@ -17,6 +17,7 @@ const COLOR_MAP = {
     BLOCKED: '#ccc', // Using 'sd-light-gray' from https://github.com/screwdriver-cd/ui/blob/master/app/styles/screwdriver-colors.scss
     UNSTABLE: '#ffd333', // Using 'sd-unstable' from https://github.com/screwdriver-cd/ui/blob/master/app/styles/screwdriver-colors.scss
     COLLAPSED: '#f2f2f2', // New color. Light grey.
+    FIXED: 'good',
     FROZEN: '#acd9ff' // Using 'sd-frozen' from https://github.com/screwdriver-cd/ui/blob/master/app/styles/screwdriver-colors.scss
 };
 const STATUSES_MAP = {
@@ -29,6 +30,7 @@ const STATUSES_MAP = {
     BLOCKED: ':lock:',
     UNSTABLE: ':foggy:',
     COLLAPSED: ':arrow_up:',
+    FIXED: ':sunny:',
     FROZEN: ':snowman:'
 };
 const DEFAULT_STATUSES = ['FAILURE'];
@@ -68,7 +70,8 @@ const SCHEMA_BUILD_DATA = Joi.object()
             id: Joi.number().integer().required()
         }).unknown(true),
         event: Joi.object(),
-        buildLink: Joi.string()
+        buildLink: Joi.string(),
+        isFixed: Joi.boolean()
     });
 const SCHEMA_SLACK_CONFIG = Joi.object()
     .keys({
@@ -136,7 +139,22 @@ class SlackNotifier extends NotificationBase {
             buildData.settings.slack.statuses = DEFAULT_STATUSES;
         }
 
-        if (!buildData.settings.slack.statuses.includes(buildData.status)) {
+        // Add for fixed notification
+        if (buildData.isFixed) {
+            buildData.settings.slack.statuses.push('FIXED');
+        }
+
+        // Do not change the `buildData.status` directly
+        // It affects the behavior of other notification plugins
+        let notificationStatus = buildData.status;
+
+        if (buildData.settings.slack.statuses.includes('FAILURE')) {
+            if (notificationStatus === 'SUCCESS' && buildData.isFixed) {
+                notificationStatus = 'FIXED';
+            }
+        }
+
+        if (!buildData.settings.slack.statuses.includes(notificationStatus)) {
             return;
         }
         const pipelineLink = buildData.buildLink.split('/builds')[0];
@@ -149,9 +167,9 @@ class SlackNotifier extends NotificationBase {
 
         let message = isMinimized ?
             // eslint-disable-next-line max-len
-            `<${pipelineLink}|${buildData.pipeline.scmRepo.name}#${buildData.jobName}> *${buildData.status}*` :
+            `<${pipelineLink}|${buildData.pipeline.scmRepo.name}#${buildData.jobName}> *${notificationStatus}*` :
             // eslint-disable-next-line max-len
-            `*${buildData.status}* ${STATUSES_MAP[buildData.status]} <${pipelineLink}|${buildData.pipeline.scmRepo.name} ${buildData.jobName}>`;
+            `*${notificationStatus}* ${STATUSES_MAP[notificationStatus]} <${pipelineLink}|${buildData.pipeline.scmRepo.name} ${buildData.jobName}>`;
 
         const metaMessage = hoek.reach(buildData,
             'build.meta.notification.slack.message', { default: false });
@@ -170,7 +188,7 @@ class SlackNotifier extends NotificationBase {
             [
                 {
                     fallback: '',
-                    color: COLOR_MAP[buildData.status],
+                    color: COLOR_MAP[notificationStatus],
                     fields: [
                         {
                             title: 'Build',
@@ -183,7 +201,7 @@ class SlackNotifier extends NotificationBase {
             [
                 {
                     fallback: '',
-                    color: COLOR_MAP[buildData.status],
+                    color: COLOR_MAP[notificationStatus],
                     title: `#${buildData.build.id}`,
                     title_link: `${buildData.buildLink}`,
                     // eslint-disable-next-line max-len
