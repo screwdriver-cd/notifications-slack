@@ -144,8 +144,8 @@ class SlackNotifier extends NotificationBase {
             buildData.settings.slack.statuses.push('FIXED');
         }
 
-        // Do not change the `buildData.status` directly.
-        // It affects the behavior of other notification plugins.
+        // Do not change the `buildData.status` directly
+        // It affects the behavior of other notification plugins
         let notificationStatus = buildData.status;
 
         if (buildData.settings.slack.statuses.includes('FAILURE')) {
