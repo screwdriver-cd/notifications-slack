@@ -140,11 +140,21 @@ class SlackNotifier extends NotificationBase {
         }
 
         // Add for fixed notification
-        if (!buildData.settings.slack.statuses.includes('SUCCESS') && buildData.isFixed) {
-            buildData.settings.slack.statuses.push('SUCCESS');
+        if (buildData.isFixed) {
+            buildData.settings.slack.statuses.push('FIXED');
         }
 
-        if (!buildData.settings.slack.statuses.includes(buildData.status)) {
+        // Do not change the `buildData.status` directly.
+        // It affects the behavior of other notification plugins.
+        let notificationStatus = buildData.status;
+
+        if (buildData.settings.slack.statuses.includes('FAILURE')) {
+            if (notificationStatus === 'SUCCESS' && buildData.isFixed) {
+                notificationStatus = 'FIXED';
+            }
+        }
+
+        if (!buildData.settings.slack.statuses.includes(notificationStatus)) {
             return;
         }
         const pipelineLink = buildData.buildLink.split('/builds')[0];
@@ -154,15 +164,6 @@ class SlackNotifier extends NotificationBase {
             `${buildData.event.commit.message.substring(0, cutOff)}...` :
             buildData.event.commit.message;
         const isMinimized = buildData.settings.slack.minimized;
-
-        // When using multiple notification plugins,Do not change the `buildData.status` directly
-        let notificationStatus = buildData.status;
-
-        if (buildData.settings.slack.statuses.includes('FAILURE')) {
-            if (buildData.status === 'SUCCESS' && buildData.isFixed) {
-                notificationStatus = 'FIXED';
-            }
-        }
 
         let message = isMinimized ?
             // eslint-disable-next-line max-len
