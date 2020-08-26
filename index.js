@@ -3,7 +3,7 @@
 const Joi = require('joi');
 const slacker = require('./slack');
 const NotificationBase = require('screwdriver-notifications-base');
-const hoek = require('hoek');
+const hoek = require('@hapi/hoek');
 
 // This should match what is in https://github.com/screwdriver-cd/data-schema/blob/master/models/build.js#L98
 // https://github.com/screwdriver-cd/ui/blob/master/app/styles/screwdriver-colors.scss
@@ -32,7 +32,7 @@ const STATUSES_MAP = {
     FROZEN: ':snowman:'
 };
 const DEFAULT_STATUSES = ['FAILURE'];
-const SCHEMA_STATUS = Joi.string().valid(Object.keys(COLOR_MAP));
+const SCHEMA_STATUS = Joi.string().valid(...Object.keys(COLOR_MAP));
 const SCHEMA_STATUSES = Joi.array()
     .items(SCHEMA_STATUS)
     .min(0);
