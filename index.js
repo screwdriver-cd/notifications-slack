@@ -171,6 +171,12 @@ class SlackNotifier extends NotificationBase {
             // eslint-disable-next-line max-len
             `*${notificationStatus}* ${STATUSES_MAP[notificationStatus]} <${pipelineLink}|${buildData.pipeline.scmRepo.name} ${buildData.jobName}>`;
 
+        const rootDir = hoek.reach(buildData, 'pipeline.scmRepo.rootDir', { default: false });
+
+        if (rootDir) {
+            message = `${message}\n*Source Directory:* ${buildData.pipeline.scmRepo.rootDir}`;
+        }
+
         const metaMessage = hoek.reach(buildData,
             'build.meta.notification.slack.message', { default: false });
 
