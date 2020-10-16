@@ -174,7 +174,7 @@ class SlackNotifier extends NotificationBase {
         const rootDir = hoek.reach(buildData, 'pipeline.scmRepo.rootDir', { default: false });
 
         if (rootDir) {
-            message = `${message}\n*Source Directory:* ${buildData.pipeline.scmRepo.rootDir}`;
+            message = `${message}\n*Source Directory:* ${rootDir}`;
         }
 
         const metaMessage = hoek.reach(buildData,
