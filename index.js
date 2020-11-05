@@ -3,9 +3,10 @@
 const Joi = require('joi');
 const slacker = require('./slack');
 const NotificationBase = require('screwdriver-notifications-base');
+const schema = require('screwdriver-data-schema');
 const hoek = require('@hapi/hoek');
 
-// This should match what is in https://github.com/screwdriver-cd/data-schema/blob/master/models/build.js#L98
+// This should match what is in https://github.com/screwdriver-cd/data-schema/blob/master/models/build.js#L14
 // https://github.com/screwdriver-cd/ui/blob/master/app/styles/screwdriver-colors.scss
 const COLOR_MAP = {
     ABORTED: 'danger',
@@ -34,9 +35,8 @@ const STATUSES_MAP = {
     FROZEN: ':snowman:'
 };
 const DEFAULT_STATUSES = ['FAILURE'];
-const SCHEMA_STATUS = Joi.string().valid(...Object.keys(COLOR_MAP));
 const SCHEMA_STATUSES = Joi.array()
-    .items(SCHEMA_STATUS)
+    .items(schema.plugins.notifications.schemaStatus)
     .min(0);
 const SCHEMA_SLACK_CHANNEL = Joi.string().required();
 const SCHEMA_SLACK_CHANNELS = Joi.array()
@@ -52,26 +52,10 @@ const SCHEMA_SLACK_SETTINGS = Joi.object().keys({
         SCHEMA_SLACK_CHANNELS, SCHEMA_SLACK_CHANNEL
     ).required()
 }).unknown(true);
-const SCHEMA_SCM_REPO = Joi.object()
-    .keys({
-        name: Joi.string().required()
-    }).unknown(true);
-const SCHEMA_PIPELINE_DATA = Joi.object()
-    .keys({
-        scmRepo: SCHEMA_SCM_REPO.required()
-    }).unknown(true);
 const SCHEMA_BUILD_DATA = Joi.object()
     .keys({
-        settings: SCHEMA_SLACK_SETTINGS.required(),
-        status: SCHEMA_STATUS.required(),
-        pipeline: SCHEMA_PIPELINE_DATA.required(),
-        jobName: Joi.string(),
-        build: Joi.object().keys({
-            id: Joi.number().integer().required()
-        }).unknown(true),
-        event: Joi.object(),
-        buildLink: Joi.string(),
-        isFixed: Joi.boolean()
+        ...schema.plugins.notifications.schemaBuildData,
+        settings: SCHEMA_SLACK_SETTINGS.required()
     });
 const SCHEMA_SLACK_CONFIG = Joi.object()
     .keys({
