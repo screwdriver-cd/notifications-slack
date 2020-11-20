@@ -447,6 +447,159 @@ describe('index', () => {
             });
         });
 
+        it('Check default minimized setting - false -', (done) => {
+            const buildDataMockSimple = {
+                settings: {
+                    slack: 'meeseeks'
+                },
+                status: 'FAILURE',
+                pipeline: {
+                    id: '123',
+                    scmRepo: {
+                        name: 'screwdriver-cd/notifications'
+                    }
+                },
+                jobName: 'publish',
+                build: {
+                    id: '1234'
+                },
+                event: {
+                    id: '12345',
+                    causeMessage: 'Merge pull request #26 from screwdriver-cd/notifications',
+                    creator: { username: 'foo' },
+                    commit: {
+                        author: { name: 'foo' },
+                        message: 'fixing a bug'
+                    },
+                    sha: '1234567890abcdeffedcba098765432100000000'
+                },
+                buildLink: 'http://thisisaSDtest.com/pipelines/12/builds/1234'
+            };
+
+            serverMock.event(eventMock);
+            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.emit(eventMock, buildDataMockSimple);
+
+            process.nextTick(() => {
+                const resp = WebClientMock.chat.postMessage.firstCall.lastArg;
+
+                assert.isNotNull(resp);
+                assert.isNotNull(resp.attachments);
+                assert.isArray(resp.attachments);
+                assert.isAtLeast(resp.attachments.length, 1);
+                assert.match(resp.attachments[0].text, 'Merge pull request #26');
+                done();
+            });
+        });
+
+        it('Job specific slack message minimized overwrite - false -', (done) => {
+            const buildDataMockSimple = {
+                settings: {
+                    slack: 'meeseeks'
+                },
+                status: 'FAILURE',
+                pipeline: {
+                    id: '123',
+                    scmRepo: {
+                        name: 'screwdriver-cd/notifications'
+                    }
+                },
+                jobName: 'publish',
+                build: {
+                    id: '1234',
+                    meta: {
+                        notification: {
+                            slack: {
+                                publish: {
+                                    minimized: false
+                                }
+                            }
+                        }
+                    }
+                },
+                event: {
+                    id: '12345',
+                    causeMessage: 'Merge pull request #26 from screwdriver-cd/notifications',
+                    creator: { username: 'foo' },
+                    commit: {
+                        author: { name: 'foo' },
+                        message: 'fixing a bug'
+                    },
+                    sha: '1234567890abcdeffedcba098765432100000000'
+                },
+                buildLink: 'http://thisisaSDtest.com/pipelines/12/builds/1234'
+            };
+
+            serverMock.event(eventMock);
+            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.emit(eventMock, buildDataMockSimple);
+
+            process.nextTick(() => {
+                const resp = WebClientMock.chat.postMessage.firstCall.lastArg;
+
+                assert.isNotNull(resp);
+                assert.isNotNull(resp.attachments);
+                assert.isArray(resp.attachments);
+                assert.isAtLeast(resp.attachments.length, 1);
+                assert.match(resp.attachments[0].text, 'Merge pull request #26');
+                done();
+            });
+        });
+
+        it('Job specific slack message minimized overwrite - true -', (done) => {
+            const buildDataMockSimple = {
+                settings: {
+                    slack: 'meeseeks'
+                },
+                status: 'FAILURE',
+                pipeline: {
+                    id: '123',
+                    scmRepo: {
+                        name: 'screwdriver-cd/notifications'
+                    }
+                },
+                jobName: 'publish',
+                build: {
+                    id: '1234',
+                    meta: {
+                        notification: {
+                            slack: {
+                                publish: {
+                                    minimized: true
+                                }
+                            }
+                        }
+                    }
+                },
+                event: {
+                    id: '12345',
+                    causeMessage: 'Merge pull request #26 from screwdriver-cd/notifications',
+                    creator: { username: 'foo' },
+                    commit: {
+                        author: { name: 'foo' },
+                        message: 'fixing a bug'
+                    },
+                    sha: '1234567890abcdeffedcba098765432100000000'
+                },
+                buildLink: 'http://thisisaSDtest.com/pipelines/12/builds/1234'
+            };
+
+            serverMock.event(eventMock);
+            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.emit(eventMock, buildDataMockSimple);
+
+            process.nextTick(() => {
+                const resp = WebClientMock.chat.postMessage.firstCall.lastArg;
+
+                assert.isNotNull(resp);
+                assert.isNotNull(resp.attachments);
+                assert.isArray(resp.attachments);
+                assert.isAtLeast(resp.attachments.length, 1);
+                assert.isNaN(resp.attachments[0].text);
+                done();
+            });
+        });
+
         it('channel meta data overwrite. 2 down to 1 channel', (done) => {
             const buildDataMockArray = {
                 settings: {

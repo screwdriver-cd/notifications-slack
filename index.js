@@ -147,7 +147,12 @@ class SlackNotifier extends NotificationBase {
         const commitMessage = buildData.event.commit.message.length > cutOff ?
             `${buildData.event.commit.message.substring(0, cutOff)}...` :
             buildData.event.commit.message;
-        const isMinimized = buildData.settings.slack.minimized;
+
+        // Slack channel overwrite from meta data. Job specific only.
+        const metaMinimizedReplaceVar =
+            `build.meta.notification.slack.${buildData.jobName}.minimized`;
+        const isMinimized = hoek.reach(buildData, metaMinimizedReplaceVar,
+            { default: buildData.settings.slack.minimized });
 
         let message = isMinimized ?
             // eslint-disable-next-line max-len
