@@ -447,7 +447,7 @@ describe('index', () => {
             });
         });
 
-        it('Check default minimized setting - false -', (done) => {
+        it('verifies the default minimized setting is false.', (done) => {
             const buildDataMockSimple = {
                 settings: {
                     slack: 'meeseeks'
@@ -492,7 +492,7 @@ describe('index', () => {
             });
         });
 
-        it('Job specific slack message minimized overwrite - false -', (done) => {
+        it('verifies minimized is set fo false for a specific job.', (done) => {
             const buildDataMockSimple = {
                 settings: {
                     slack: 'meeseeks'
@@ -546,7 +546,7 @@ describe('index', () => {
             });
         });
 
-        it('Job specific slack message minimized overwrite - true -', (done) => {
+        it('verifies minimized is set to true for a specific job.', (done) => {
             const buildDataMockSimple = {
                 settings: {
                     slack: 'meeseeks'
