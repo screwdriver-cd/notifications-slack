@@ -492,7 +492,7 @@ describe('index', () => {
             });
         });
 
-        it('verifies minimized is set fo false for a specific job.', (done) => {
+        it('verifies minimized is set to false for a specific job.', (done) => {
             const buildDataMockSimple = {
                 settings: {
                     slack: 'meeseeks'
