@@ -951,4 +951,103 @@ describe('index', () => {
             });
         });
     });
+
+    describe('validate config', () => {
+        it('valid config with complete parameters', () => {
+            configMock = {
+                slack: {
+                    channels: ['foo-channel'],
+                    statuses: ['SUCCESS', 'FAILURE'],
+                    minimized: true
+                }
+            };
+            const { error } = SlackNotifier.validateConfig(configMock);
+
+            assert.isUndefined(error);
+        });
+
+        it('valid config with empty statuses', () => {
+            configMock = {
+                slack: {
+                    channels: ['foo-channel'],
+                    statuses: []
+                }
+            };
+            const { error } = SlackNotifier.validateConfig(configMock);
+
+            assert.isUndefined(error);
+        });
+
+        it('valid config with a channel', () => {
+            configMock = {
+                slack: 'foo-channel'
+            };
+            const { error } = SlackNotifier.validateConfig(configMock);
+
+            assert.isUndefined(error);
+        });
+
+        it('valid config with channels', () => {
+            configMock = {
+                slack: ['foo-channel', 'bar-channel']
+            };
+            const { error } = SlackNotifier.validateConfig(configMock);
+
+            assert.isUndefined(error);
+        });
+
+        it('invalid config with empty parameters', () => {
+            configMock = {};
+            const { error } = SlackNotifier.validateConfig(configMock);
+
+            assert.instanceOf(error, Error);
+            assert.equal(error.name, 'ValidationError');
+        });
+
+        it('valid config with empty slack settings', () => {
+            configMock = {
+                slack: {}
+            };
+            const { error } = SlackNotifier.validateConfig(configMock);
+
+            assert.isUndefined(error);
+        });
+
+        it('valid config without channels', () => {
+            configMock = {
+                slack: {
+                    statuses: ['SUCCESS', 'FAILURE']
+                }
+            };
+            const { error } = SlackNotifier.validateConfig(configMock);
+
+            assert.isUndefined(error);
+        });
+
+        it('invalid config with empty channels', () => {
+            configMock = {
+                slack: {
+                    channels: [],
+                    statuses: ['SUCCESS', 'FAILURE']
+                }
+            };
+            const { error } = SlackNotifier.validateConfig(configMock);
+
+            assert.instanceOf(error, Error);
+            assert.equal(error.name, 'ValidationError');
+        });
+
+        it('invalid unknown status', () => {
+            configMock = {
+                slack: {
+                    channels: ['foo-channel'],
+                    statuses: ['DUMMY_STATUS']
+                }
+            };
+            const { error } = SlackNotifier.validateConfig(configMock);
+
+            assert.instanceOf(error, Error);
+            assert.equal(error.name, 'ValidationError');
+        });
+    });
 });

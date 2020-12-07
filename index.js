@@ -213,7 +213,7 @@ class SlackNotifier extends NotificationBase {
     }
 
     static validateConfig(config) {
-        return Joi.validate(config, SCHEMA_SLACK_SETTINGS);
+        return SCHEMA_SLACK_SETTINGS.validate(config);
     }
 }
 
