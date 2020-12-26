@@ -43,7 +43,7 @@
   "dependencies": {
     "@hapi/hapi": "^20.0.0",
     "@hapi/hoek": "^9.0.4",
-    "@slack/client": "^4.3.1",
+    "@slack/web-api": "^5.14.0",
     "joi": "^17.2.1",
     "mockery": "^2.1.0",
     "request": "^2.87.0",

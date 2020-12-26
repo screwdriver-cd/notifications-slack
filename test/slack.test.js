@@ -40,7 +40,7 @@ describe('slack', () => {
         WebClientConstructorMock = {
             WebClient: sinon.stub().returns(WebClientMock)
         };
-        mockery.registerMock('@slack/client', WebClientConstructorMock);
+        mockery.registerMock('@slack/web-api', WebClientConstructorMock);
 
         // eslint-disable-next-line global-require
         slacker = require('../slack');
