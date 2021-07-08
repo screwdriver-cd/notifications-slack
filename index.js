@@ -1,10 +1,10 @@
 'use strict';
 
 const Joi = require('joi');
-const slacker = require('./slack');
 const NotificationBase = require('screwdriver-notifications-base');
 const schema = require('screwdriver-data-schema');
 const hoek = require('@hapi/hoek');
+const slacker = require('./slack');
 
 // This should match what is in https://github.com/screwdriver-cd/data-schema/blob/master/models/build.js#L14
 // https://github.com/screwdriver-cd/ui/blob/master/app/styles/screwdriver-colors.scss
@@ -42,43 +42,46 @@ const SCHEMA_SLACK_CHANNEL = Joi.string().required();
 const SCHEMA_SLACK_CHANNELS = Joi.array()
     .items(SCHEMA_SLACK_CHANNEL)
     .min(1);
-const SCHEMA_SLACK_SETTINGS = Joi.object().keys({
-    slack: Joi.alternatives().try(
-        Joi.object().keys({
-            channels: SCHEMA_SLACK_CHANNELS,
-            statuses: SCHEMA_STATUSES,
-            minimized: Joi.boolean()
-        }),
-        SCHEMA_SLACK_CHANNELS, SCHEMA_SLACK_CHANNEL
-    ).required()
-}).unknown(true);
-const SCHEMA_BUILD_DATA = Joi.object()
+const SCHEMA_SLACK_SETTINGS = Joi.object()
     .keys({
-        ...schema.plugins.notifications.schemaBuildData,
-        settings: SCHEMA_SLACK_SETTINGS.required()
-    });
-const SCHEMA_SLACK_CONFIG = Joi.object()
-    .keys({
-        token: Joi.string().required()
-    });
+        slack: Joi.alternatives()
+            .try(
+                Joi.object().keys({
+                    channels: SCHEMA_SLACK_CHANNELS,
+                    statuses: SCHEMA_STATUSES,
+                    minimized: Joi.boolean()
+                }),
+                SCHEMA_SLACK_CHANNELS,
+                SCHEMA_SLACK_CHANNEL
+            )
+            .required()
+    })
+    .unknown(true);
+const SCHEMA_BUILD_DATA = Joi.object().keys({
+    ...schema.plugins.notifications.schemaBuildData,
+    settings: SCHEMA_SLACK_SETTINGS.required()
+});
+const SCHEMA_SLACK_CONFIG = Joi.object().keys({
+    token: Joi.string().required()
+});
 
 class SlackNotifier extends NotificationBase {
     /**
-    * Constructs an SlackNotifier
-    * @constructor
-    * @param {object} config - Screwdriver config object initialized in API
-    */
+     * Constructs an SlackNotifier
+     * @constructor
+     * @param {object} config - Screwdriver config object initialized in API
+     */
     constructor(config) {
         super(...arguments);
-        this.config = Joi.attempt(config, SCHEMA_SLACK_CONFIG,
-            'Invalid config for slack notifications');
+        this.config = Joi.attempt(config, SCHEMA_SLACK_CONFIG, 'Invalid config for slack notifications');
     }
+
     /**
-    * Sets listener on server event of name 'eventName' in Screwdriver
-    * Currently, event is triggered with a build status is updated
-    * @method _notify
-    * @param {Object} buildData - Build data emitted with some event from Screwdriver
-    */
+     * Sets listener on server event of name 'eventName' in Screwdriver
+     * Currently, event is triggered with a build status is updated
+     * @method _notify
+     * @param {Object} buildData - Build data emitted with some event from Screwdriver
+     */
     _notify(buildData) {
         // Check buildData format against SCHEMA_BUILD_DATA
         try {
@@ -100,15 +103,12 @@ class SlackNotifier extends NotificationBase {
         if (metaDataSlackChannel) {
             channelReplacement = metaDataSlackChannel.split(',');
             // Remove empty/blank items.
-            channelReplacement = channelReplacement.filter(
-                x => (x.trim() !== ('')));
+            channelReplacement = channelReplacement.filter(x => x.trim() !== '');
         }
         // Slack channels from configuration
-        if (typeof buildData.settings.slack === 'string' ||
-            Array.isArray(buildData.settings.slack)) {
-            buildData.settings.slack = (typeof buildData.settings.slack === 'string')
-                ? [buildData.settings.slack]
-                : buildData.settings.slack;
+        if (typeof buildData.settings.slack === 'string' || Array.isArray(buildData.settings.slack)) {
+            buildData.settings.slack =
+                typeof buildData.settings.slack === 'string' ? [buildData.settings.slack] : buildData.settings.slack;
             buildData.settings.slack = {
                 channels: buildData.settings.slack,
                 statuses: DEFAULT_STATUSES,
@@ -144,21 +144,22 @@ class SlackNotifier extends NotificationBase {
         const pipelineLink = buildData.buildLink.split('/builds')[0];
         const truncatedSha = buildData.event.sha.slice(0, 6);
         const cutOff = 150;
-        const commitMessage = buildData.event.commit.message.length > cutOff ?
-            `${buildData.event.commit.message.substring(0, cutOff)}...` :
-            buildData.event.commit.message;
+        const commitMessage =
+            buildData.event.commit.message.length > cutOff
+                ? `${buildData.event.commit.message.substring(0, cutOff)}...`
+                : buildData.event.commit.message;
 
         // Slack channel overwrite from meta data. Job specific only.
-        const metaMinimizedReplaceVar =
-            `build.meta.notification.slack.${buildData.jobName}.minimized`;
-        const isMinimized = hoek.reach(buildData, metaMinimizedReplaceVar,
-            { default: buildData.settings.slack.minimized });
+        const metaMinimizedReplaceVar = `build.meta.notification.slack.${buildData.jobName}.minimized`;
+        const isMinimized = hoek.reach(buildData, metaMinimizedReplaceVar, {
+            default: buildData.settings.slack.minimized
+        });
 
-        let message = isMinimized ?
-            // eslint-disable-next-line max-len
-            `<${pipelineLink}|${buildData.pipeline.scmRepo.name}#${buildData.jobName}> *${notificationStatus}*` :
-            // eslint-disable-next-line max-len
-            `*${notificationStatus}* ${STATUSES_MAP[notificationStatus]} <${pipelineLink}|${buildData.pipeline.scmRepo.name} ${buildData.jobName}>`;
+        let message = isMinimized
+            ? // eslint-disable-next-line max-len
+              `<${pipelineLink}|${buildData.pipeline.scmRepo.name}#${buildData.jobName}> *${notificationStatus}*`
+            : // eslint-disable-next-line max-len
+              `*${notificationStatus}* ${STATUSES_MAP[notificationStatus]} <${pipelineLink}|${buildData.pipeline.scmRepo.name} ${buildData.jobName}>`;
 
         const rootDir = hoek.reach(buildData, 'pipeline.scmRepo.rootDir', { default: false });
 
@@ -166,8 +167,7 @@ class SlackNotifier extends NotificationBase {
             message = `${message}\n*Source Directory:* ${rootDir}`;
         }
 
-        const metaMessage = hoek.reach(buildData,
-            'build.meta.notification.slack.message', { default: false });
+        const metaMessage = hoek.reach(buildData, 'build.meta.notification.slack.message', { default: false });
 
         const metaVar = `build.meta.notification.slack.${buildData.jobName}.message`;
 
@@ -179,31 +179,32 @@ class SlackNotifier extends NotificationBase {
         } else if (metaMessage) {
             message = `${message}\n${metaMessage}`;
         }
-        const attachments = isMinimized ?
-            [
-                {
-                    fallback: '',
-                    color: COLOR_MAP[notificationStatus],
-                    fields: [
-                        {
-                            title: 'Build',
-                            value: `<${buildData.buildLink}|#${buildData.build.id}>`,
-                            short: true
-                        }
-                    ]
-                }
-            ] :
-            [
-                {
-                    fallback: '',
-                    color: COLOR_MAP[notificationStatus],
-                    title: `#${buildData.build.id}`,
-                    title_link: `${buildData.buildLink}`,
-                    // eslint-disable-next-line max-len
-                    text: `${commitMessage} (<${buildData.event.commit.url}|${truncatedSha}>)` +
-                            `\n${buildData.event.causeMessage}`
-                }
-            ];
+        const attachments = isMinimized
+            ? [
+                  {
+                      fallback: '',
+                      color: COLOR_MAP[notificationStatus],
+                      fields: [
+                          {
+                              title: 'Build',
+                              value: `<${buildData.buildLink}|#${buildData.build.id}>`,
+                              short: true
+                          }
+                      ]
+                  }
+              ]
+            : [
+                  {
+                      fallback: '',
+                      color: COLOR_MAP[notificationStatus],
+                      title: `#${buildData.build.id}`,
+                      title_link: `${buildData.buildLink}`,
+                      // eslint-disable-next-line max-len
+                      text:
+                          `${commitMessage} (<${buildData.event.commit.url}|${truncatedSha}>)` +
+                          `\n${buildData.event.causeMessage}`
+                  }
+              ];
         const slackMessage = {
             message,
             attachments

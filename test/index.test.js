@@ -1,7 +1,7 @@
 'use strict';
 
 const Hapi = require('@hapi/hapi');
-const assert = require('chai').assert;
+const { assert } = require('chai');
 const mockery = require('mockery');
 const sinon = require('sinon');
 
@@ -28,10 +28,12 @@ describe('index', () => {
         WebClientMock = {
             channels: {
                 list: sinon.stub().resolves({
-                    channels: [{
-                        name: 'meeseeks',
-                        id: '23'
-                    }]
+                    channels: [
+                        {
+                            name: 'meeseeks',
+                            id: '23'
+                        }
+                    ]
                 })
             },
             chat: {
@@ -96,7 +98,7 @@ describe('index', () => {
             notifier = new SlackNotifier(configMock);
         });
 
-        it('verifies that included status creates slack notifier', (done) => {
+        it('verifies that included status creates slack notifier', done => {
             serverMock.event(eventMock);
             serverMock.events.on(eventMock, data => notifier.notify(data));
             serverMock.events.emit(eventMock, buildDataMock);
@@ -108,7 +110,7 @@ describe('index', () => {
             });
         });
 
-        it('when the build status is fixed, Overwrites the notification status title', (done) => {
+        it('when the build status is fixed, Overwrites the notification status title', done => {
             serverMock.event(eventMock);
             serverMock.events.on(eventMock, data => notifier.notify(data));
             buildDataMock.isFixed = true;
@@ -121,7 +123,7 @@ describe('index', () => {
             });
         });
 
-        it('verifies that non-included status does not send a notification', (done) => {
+        it('verifies that non-included status does not send a notification', done => {
             const buildDataMockUnincluded = {
                 settings: {
                     slack: {
@@ -163,7 +165,7 @@ describe('index', () => {
             });
         });
 
-        it('verifies that non-subscribed status does not send a notification', (done) => {
+        it('verifies that non-subscribed status does not send a notification', done => {
             const buildDataMockUnincluded = {
                 settings: {
                     slack: {
@@ -184,7 +186,7 @@ describe('index', () => {
             });
         });
 
-        it('sets statuses for an array of channels in config settings.slack', (done) => {
+        it('sets statuses for an array of channels in config settings.slack', done => {
             const buildDataMockSimple = {
                 settings: {
                     slack: {
@@ -225,7 +227,7 @@ describe('index', () => {
             });
         });
 
-        it('sets channels and statuses for simple slack string name', (done) => {
+        it('sets channels and statuses for simple slack string name', done => {
             const buildDataMockSimple = {
                 settings: {
                     slack: 'meeseeks'
@@ -264,7 +266,7 @@ describe('index', () => {
             });
         });
 
-        it('sets channels, statuses and srcDir for simple slack string name', (done) => {
+        it('sets channels, statuses and srcDir for simple slack string name', done => {
             const buildDataMockSimple = {
                 settings: {
                     slack: 'meeseeks'
@@ -304,7 +306,7 @@ describe('index', () => {
             });
         });
 
-        it('sets channels and statuses for simple slack string name with message', (done) => {
+        it('sets channels and statuses for simple slack string name with message', done => {
             const buildDataMockSimple = {
                 settings: {
                     slack: 'meeseeks'
@@ -350,7 +352,7 @@ describe('index', () => {
             });
         });
 
-        it('Job specific slack message. No generic slack message', (done) => {
+        it('Job specific slack message. No generic slack message', done => {
             const buildDataMockSimple = {
                 settings: {
                     slack: 'meeseeks'
@@ -398,7 +400,7 @@ describe('index', () => {
             });
         });
 
-        it('Job specific slack message overwriting the generic message', (done) => {
+        it('Job specific slack message overwriting the generic message', done => {
             const buildDataMockSimple = {
                 settings: {
                     slack: 'meeseeks'
@@ -447,7 +449,7 @@ describe('index', () => {
             });
         });
 
-        it('verifies the default minimized setting is false.', (done) => {
+        it('verifies the default minimized setting is false.', done => {
             const buildDataMockSimple = {
                 settings: {
                     slack: 'meeseeks'
@@ -492,7 +494,7 @@ describe('index', () => {
             });
         });
 
-        it('verifies minimized is set to false for a specific job.', (done) => {
+        it('verifies minimized is set to false for a specific job.', done => {
             const buildDataMockSimple = {
                 settings: {
                     slack: 'meeseeks'
@@ -546,7 +548,7 @@ describe('index', () => {
             });
         });
 
-        it('verifies minimized is set to true for a specific job.', (done) => {
+        it('verifies minimized is set to true for a specific job.', done => {
             const buildDataMockSimple = {
                 settings: {
                     slack: 'meeseeks'
@@ -600,7 +602,7 @@ describe('index', () => {
             });
         });
 
-        it('channel meta data overwrite. 2 down to 1 channel', (done) => {
+        it('channel meta data overwrite. 2 down to 1 channel', done => {
             const buildDataMockArray = {
                 settings: {
                     slack: ['meeseeks', 'second']
@@ -648,7 +650,7 @@ describe('index', () => {
             });
         });
 
-        it('channel meta data overwrite. should not overwrite. wrong job name', (done) => {
+        it('channel meta data overwrite. should not overwrite. wrong job name', done => {
             const buildDataMockArray = {
                 settings: {
                     slack: ['meeseeks', 'second']
@@ -696,7 +698,7 @@ describe('index', () => {
             });
         });
 
-        it('channel meta data overwrite. 1 up to 2 channels', (done) => {
+        it('channel meta data overwrite. 1 up to 2 channels', done => {
             const buildDataMockArray = {
                 settings: {
                     slack: ['meeseeks']
@@ -744,7 +746,7 @@ describe('index', () => {
             });
         });
 
-        it('channel meta data overwrite. 1 up to 2 channels. Empty item in overwrite', (done) => {
+        it('channel meta data overwrite. 1 up to 2 channels. Empty item in overwrite', done => {
             const buildDataMockArray = {
                 settings: {
                     slack: ['meeseeks']
@@ -792,7 +794,7 @@ describe('index', () => {
             });
         });
 
-        it('sets channels and statuses for an array of channels in config settings', (done) => {
+        it('sets channels and statuses for an array of channels in config settings', done => {
             const buildDataMockArray = {
                 settings: {
                     slack: ['meeseeks', 'abcde']
@@ -831,7 +833,7 @@ describe('index', () => {
             });
         });
 
-        it('allows additional notifications plugins in buildData.settings', (done) => {
+        it('allows additional notifications plugins in buildData.settings', done => {
             buildDataMock.settings.hipchat = {
                 awesome: 'sauce',
                 catch: 22
@@ -847,7 +849,7 @@ describe('index', () => {
             });
         });
 
-        it('returns when buildData.settings is empty', (done) => {
+        it('returns when buildData.settings is empty', done => {
             delete buildDataMock.settings.slack;
 
             serverMock.event(eventMock);
@@ -914,7 +916,7 @@ describe('index', () => {
             notifier = new SlackNotifier(configMock);
         });
 
-        it('validates status', (done) => {
+        it('validates status', done => {
             buildDataMock.status = 22;
             serverMock.event(eventMock);
             serverMock.events.on(eventMock, data => notifier.notify(data));
@@ -926,7 +928,7 @@ describe('index', () => {
             });
         });
 
-        it('validates slack settings', (done) => {
+        it('validates slack settings', done => {
             buildDataMock.settings.slack = { room: 'wrongKey', minimized: true };
             serverMock.event(eventMock);
             serverMock.events.on(eventMock, data => notifier.notify(data));
@@ -938,7 +940,7 @@ describe('index', () => {
             });
         });
 
-        it('validates buildData format', (done) => {
+        it('validates buildData format', done => {
             const buildDataMockInvalid = ['this', 'is', 'wrong'];
 
             serverMock.event(eventMock);

@@ -13,14 +13,17 @@ let web;
  */
 function postMessage(channelName, payload) {
     // Can post to channel name directly https://api.slack.com/methods/chat.postMessage#channels
-    return web.chat.postMessage({
-        channel: channelName,
-        text: payload.message,
-        as_user: true,
-        attachments: payload.attachments
-    })
-        // eslint-disable-next-line no-console
-        .catch(err => console.error(err.message));
+    return (
+        web.chat
+            .postMessage({
+                channel: channelName,
+                text: payload.message,
+                as_user: true,
+                attachments: payload.attachments
+            })
+            // eslint-disable-next-line no-console
+            .catch(err => console.error(err.message))
+    );
 }
 
 /**
