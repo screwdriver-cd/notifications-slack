@@ -597,7 +597,7 @@ describe('index', () => {
                 assert.isNotNull(resp.attachments);
                 assert.isArray(resp.attachments);
                 assert.isAtLeast(resp.attachments.length, 1);
-                assert.isNaN(resp.attachments[0].text);
+                assert.isUndefined(resp.attachments[0].text);
                 done();
             });
         });
