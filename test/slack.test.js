@@ -1,6 +1,6 @@
 'use strict';
 
-const assert = require('chai').assert;
+const { assert } = require('chai');
 const mockery = require('mockery');
 const sinon = require('sinon');
 
@@ -24,13 +24,16 @@ describe('slack', () => {
         WebClientMock = {
             channels: {
                 list: sinon.stub().resolves({
-                    channels: [{
-                        name: 'meeseeks',
-                        id: '23'
-                    }, {
-                        name: 'dd',
-                        id: '21'
-                    }]
+                    channels: [
+                        {
+                            name: 'meeseeks',
+                            id: '23'
+                        },
+                        {
+                            name: 'dd',
+                            id: '21'
+                        }
+                    ]
                 })
             },
             chat: {
@@ -70,8 +73,7 @@ describe('slack', () => {
         it('does not create client again if there is one', () =>
             slacker(configMock.token, channels, payload)
                 .then(slacker(configMock.token, channels, payload))
-                .then(assert.calledOnce(WebClientConstructorMock.WebClient))
-        );
+                .then(assert.calledOnce(WebClientConstructorMock.WebClient)));
 
         it('gets correct channel ids and post message to channels', () =>
             slacker(configMock.token, channels, payload).then(() => {
@@ -88,8 +90,7 @@ describe('slack', () => {
                     as_user: true,
                     attachments: payload.attachments
                 });
-            })
-        );
+            }));
 
         it('logs an error if cannt post message to channels', () => {
             WebClientMock.chat.postMessage.rejects(new Error('error!'));
