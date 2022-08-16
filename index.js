@@ -240,16 +240,14 @@ function jobStatus(jobData, config) {
         };
     }
 
-    const { pipelineLink } = jobData;
     const isMinimized = jobData.settings.slack.minimized;
-
     const message = isMinimized
         ? // eslint-disable-next-line max-len
-          `<${pipelineLink}|${jobData.pipeline.scmRepo.name}#${jobData.jobName}> *${jobData.status}*\n${jobData.message}`
+          `<${jobData.pipelineLink}|${jobData.pipeline.scmRepo.name}#${jobData.jobName}> *${jobData.status}*\n${jobData.message}`
         : // eslint-disable-next-line max-len
-          `*${jobData.status}* ${STATUSES_MAP[jobData.status]} <${pipelineLink}|${jobData.pipeline.scmRepo.name} ${
-              jobData.jobName
-          }>\n${jobData.message}`;
+          `*${jobData.status}* ${STATUSES_MAP[jobData.status]} <${jobData.pipelineLink}|${
+              jobData.pipeline.scmRepo.name
+          } ${jobData.jobName}>\n${jobData.message}`;
 
     const slackMessage = {
         message
