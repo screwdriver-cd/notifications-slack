@@ -229,17 +229,6 @@ function jobStatus(jobData, config) {
         return;
     }
 
-    // Slack channel overwrite from meta data. Job specific only.
-    const metaReplaceVar = `build.meta.notification.slack.${jobData.jobName}.channels`;
-    const metaDataSlackChannel = hoek.reach(jobData, metaReplaceVar, { default: false });
-    let channelReplacement;
-
-    if (metaDataSlackChannel) {
-        channelReplacement = metaDataSlackChannel.split(',');
-        // Remove empty/blank items.
-        channelReplacement = channelReplacement.filter(x => x.trim() !== '');
-    }
-
     // Slack channels from configuration
     if (typeof jobData.settings.slack === 'string' || Array.isArray(jobData.settings.slack)) {
         jobData.settings.slack =
@@ -249,10 +238,6 @@ function jobStatus(jobData, config) {
             statuses: DEFAULT_STATUSES,
             minimized: false
         };
-    }
-
-    if (channelReplacement) {
-        jobData.settings.slack.channels = channelReplacement;
     }
 
     const { pipelineLink } = jobData;
