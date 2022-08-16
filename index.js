@@ -80,10 +80,11 @@ const SCHEMA_SLACK_CONFIG = Joi.object().keys({
  * @param  {Object}         buildData.event              Event
  * @param  {String}         buildData.buildLink          Build link
  * @param  {Object}         buildData.settings           Notification setting
+ * @param  {Object}         config                       Slack notifications config
  */
-function buildStatus(buildData) {
+function buildStatus(buildData, config) {
     try {
-        Joi.attempt(payload, SCHEMA_BUILD_DATA, 'Invalid build data format');
+        Joi.attempt(buildData, SCHEMA_BUILD_DATA, 'Invalid build data format');
     } catch (e) {
         return;
     }
@@ -153,9 +154,9 @@ function buildStatus(buildData) {
 
     let message = isMinimized
         ? // eslint-disable-next-line max-len
-            `<${pipelineLink}|${buildData.pipeline.scmRepo.name}#${buildData.jobName}> *${notificationStatus}*`
+          `<${pipelineLink}|${buildData.pipeline.scmRepo.name}#${buildData.jobName}> *${notificationStatus}*`
         : // eslint-disable-next-line max-len
-            `*${notificationStatus}* ${STATUSES_MAP[notificationStatus]} <${pipelineLink}|${buildData.pipeline.scmRepo.name} ${buildData.jobName}>`;
+          `*${notificationStatus}* ${STATUSES_MAP[notificationStatus]} <${pipelineLink}|${buildData.pipeline.scmRepo.name} ${buildData.jobName}>`;
 
     const rootDir = hoek.reach(buildData, 'pipeline.scmRepo.rootDir', { default: false });
 
@@ -176,41 +177,41 @@ function buildStatus(buildData) {
 
     const attachments = isMinimized
         ? [
-                {
-                    fallback: '',
-                    color: COLOR_MAP[notificationStatus],
-                    fields: [
-                        {
-                            title: 'Build',
-                            value: `<${buildData.buildLink}|#${buildData.build.id}>`,
-                            short: true
-                        }
-                    ]
-                }
-            ]
+              {
+                  fallback: '',
+                  color: COLOR_MAP[notificationStatus],
+                  fields: [
+                      {
+                          title: 'Build',
+                          value: `<${buildData.buildLink}|#${buildData.build.id}>`,
+                          short: true
+                      }
+                  ]
+              }
+          ]
         : [
-                {
-                    fallback: '',
-                    color: COLOR_MAP[notificationStatus],
-                    title: `#${buildData.build.id}`,
-                    title_link: `${buildData.buildLink}`,
-                    // eslint-disable-next-line max-len
-                    text:
-                        `${commitMessage} (<${buildData.event.commit.url}|${truncatedSha}>)` +
-                        `\n${buildData.event.causeMessage}`
-                }
-            ];
+              {
+                  fallback: '',
+                  color: COLOR_MAP[notificationStatus],
+                  title: `#${buildData.build.id}`,
+                  title_link: `${buildData.buildLink}`,
+                  // eslint-disable-next-line max-len
+                  text:
+                      `${commitMessage} (<${buildData.event.commit.url}|${truncatedSha}>)` +
+                      `\n${buildData.event.causeMessage}`
+              }
+          ];
 
     const slackMessage = {
         message,
         attachments
     };
 
-    slacker(this.config.token, buildData.settings.slack.channels, slackMessage);
+    slacker(config.token, buildData.settings.slack.channels, slackMessage);
 }
 
 /**
- * Handle slack messaging for job status 
+ * Handle slack messaging for job status
  * @method jobStatus
  * @param  {Object}         jobData
  * @param  {String}         jobData.status             Status
@@ -219,10 +220,11 @@ function buildStatus(buildData) {
  * @param  {String}         jobData.pipelineLink       Pipeline link
  * @param  {String}         jobData.message            Message
  * @param  {Object}         jobData.settings           Notification setting
+ * @param  {Object}         config                     Slack notifications config
  */
-function jobStatus(jobData) {
+function jobStatus(jobData, config) {
     try {
-        Joi.attempt(payload, SCHEMA_JOB_DATA, 'Invalid job data format');
+        Joi.attempt(jobData, SCHEMA_JOB_DATA, 'Invalid job data format');
     } catch (e) {
         return;
     }
@@ -242,7 +244,7 @@ function jobStatus(jobData) {
     if (typeof jobData.settings.slack === 'string' || Array.isArray(jobData.settings.slack)) {
         jobData.settings.slack =
             typeof jobData.settings.slack === 'string' ? [jobData.settings.slack] : jobData.settings.slack;
-            jobData.settings.slack = {
+        jobData.settings.slack = {
             channels: jobData.settings.slack,
             statuses: DEFAULT_STATUSES,
             minimized: false
@@ -253,20 +255,22 @@ function jobStatus(jobData) {
         jobData.settings.slack.channels = channelReplacement;
     }
 
-    const pipelineLink = jobData.pipelineLink;
+    const { pipelineLink } = jobData;
     const isMinimized = jobData.settings.slack.minimized;
 
     const message = isMinimized
         ? // eslint-disable-next-line max-len
-            `<${pipelineLink}|${jobData.pipeline.scmRepo.name}#${jobData.jobName}> *${jobData.status}*\n${jobData.message}`
+          `<${pipelineLink}|${jobData.pipeline.scmRepo.name}#${jobData.jobName}> *${jobData.status}*\n${jobData.message}`
         : // eslint-disable-next-line max-len
-            `*${jobData.status}* ${STATUSES_MAP[jobData.status]} <${pipelineLink}|${jobData.pipeline.scmRepo.name} ${buildData.jobName}>\n${jobData.message}`;
+          `*${jobData.status}* ${STATUSES_MAP[jobData.status]} <${pipelineLink}|${jobData.pipeline.scmRepo.name} ${
+              jobData.jobName
+          }>\n${jobData.message}`;
 
     const slackMessage = {
         message
     };
 
-    slacker(this.config.token, jobData.settings.slack.channels, slackMessage);
+    slacker(config.token, jobData.settings.slack.channels, slackMessage);
 }
 
 class SlackNotifier extends NotificationBase {
@@ -287,19 +291,18 @@ class SlackNotifier extends NotificationBase {
      * @param {Object} payload - Data emitted with some event from Screwdriver
      */
     _notify(event, payload) {
-        if (Object.keys(payload.settings).length === 0) {
+        if (!payload || !payload.settings || Object.keys(payload.settings).length === 0) {
             return;
         }
 
-        switch(event) {
+        switch (event) {
             case 'build_status':
-                buildStatus(payload);
+                buildStatus(payload, this.config);
                 break;
             case 'job_status':
-                jobStatus(payload);
+                jobStatus(payload, this.config);
                 break;
             default:
-                return;
         }
     }
 

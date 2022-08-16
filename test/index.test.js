@@ -7,15 +7,15 @@ const sinon = require('sinon');
 
 sinon.assert.expose(assert, { prefix: '' });
 describe('index', () => {
-    const eventMock = 'build_status_test';
-
     let SlackNotifier;
     let serverMock;
     let configMock;
     let notifier;
     let buildDataMock;
+    let jobDataMock;
     let WebClientMock;
     let WebClientConstructorMock;
+    let eventMock;
 
     before(() => {
         mockery.enable({
@@ -96,11 +96,12 @@ describe('index', () => {
                 isFixed: false
             };
             notifier = new SlackNotifier(configMock);
+            eventMock = 'build_status';
         });
 
         it('verifies that included status creates slack notifier', done => {
             serverMock.event(eventMock);
-            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
             serverMock.events.emit(eventMock, buildDataMock);
 
             process.nextTick(() => {
@@ -112,7 +113,7 @@ describe('index', () => {
 
         it('when the build status is fixed, Overwrites the notification status title', done => {
             serverMock.event(eventMock);
-            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
             buildDataMock.isFixed = true;
             serverMock.events.emit(eventMock, buildDataMock);
 
@@ -156,7 +157,7 @@ describe('index', () => {
             };
 
             serverMock.event(eventMock);
-            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
             serverMock.events.emit(eventMock, buildDataMockUnincluded);
 
             process.nextTick(() => {
@@ -177,7 +178,7 @@ describe('index', () => {
             };
 
             serverMock.event(eventMock);
-            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
             serverMock.events.emit(eventMock, buildDataMockUnincluded);
 
             process.nextTick(() => {
@@ -218,7 +219,7 @@ describe('index', () => {
             };
 
             serverMock.event(eventMock);
-            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
             serverMock.events.emit(eventMock, buildDataMockSimple);
 
             process.nextTick(() => {
@@ -257,7 +258,7 @@ describe('index', () => {
             };
 
             serverMock.event(eventMock);
-            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
             serverMock.events.emit(eventMock, buildDataMockSimple);
 
             process.nextTick(() => {
@@ -297,7 +298,7 @@ describe('index', () => {
             };
 
             serverMock.event(eventMock);
-            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
             serverMock.events.emit(eventMock, buildDataMockSimple);
 
             process.nextTick(() => {
@@ -343,7 +344,7 @@ describe('index', () => {
             };
 
             serverMock.event(eventMock);
-            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
             serverMock.events.emit(eventMock, buildDataMockSimple);
 
             process.nextTick(() => {
@@ -391,7 +392,7 @@ describe('index', () => {
             };
 
             serverMock.event(eventMock);
-            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
             serverMock.events.emit(eventMock, buildDataMockSimple);
 
             process.nextTick(() => {
@@ -440,7 +441,7 @@ describe('index', () => {
             };
 
             serverMock.event(eventMock);
-            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
             serverMock.events.emit(eventMock, buildDataMockSimple);
 
             process.nextTick(() => {
@@ -479,7 +480,7 @@ describe('index', () => {
             };
 
             serverMock.event(eventMock);
-            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
             serverMock.events.emit(eventMock, buildDataMockSimple);
 
             process.nextTick(() => {
@@ -533,7 +534,7 @@ describe('index', () => {
             };
 
             serverMock.event(eventMock);
-            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
             serverMock.events.emit(eventMock, buildDataMockSimple);
 
             process.nextTick(() => {
@@ -587,7 +588,7 @@ describe('index', () => {
             };
 
             serverMock.event(eventMock);
-            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
             serverMock.events.emit(eventMock, buildDataMockSimple);
 
             process.nextTick(() => {
@@ -641,7 +642,7 @@ describe('index', () => {
             };
 
             serverMock.event(eventMock);
-            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
             serverMock.events.emit(eventMock, buildDataMockArray);
 
             process.nextTick(() => {
@@ -689,7 +690,7 @@ describe('index', () => {
             };
 
             serverMock.event(eventMock);
-            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
             serverMock.events.emit(eventMock, buildDataMockArray);
 
             process.nextTick(() => {
@@ -737,7 +738,7 @@ describe('index', () => {
             };
 
             serverMock.event(eventMock);
-            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
             serverMock.events.emit(eventMock, buildDataMockArray);
 
             process.nextTick(() => {
@@ -785,7 +786,7 @@ describe('index', () => {
             };
 
             serverMock.event(eventMock);
-            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
             serverMock.events.emit(eventMock, buildDataMockArray);
 
             process.nextTick(() => {
@@ -824,7 +825,7 @@ describe('index', () => {
             };
 
             serverMock.event(eventMock);
-            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
             serverMock.events.emit(eventMock, buildDataMockArray);
 
             process.nextTick(() => {
@@ -840,7 +841,7 @@ describe('index', () => {
             };
 
             serverMock.event(eventMock);
-            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
             serverMock.events.emit(eventMock, buildDataMock);
 
             process.nextTick(() => {
@@ -853,7 +854,7 @@ describe('index', () => {
             delete buildDataMock.settings.slack;
 
             serverMock.event(eventMock);
-            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
             serverMock.events.emit(eventMock, buildDataMock);
 
             process.nextTick(() => {
@@ -914,12 +915,13 @@ describe('index', () => {
             };
 
             notifier = new SlackNotifier(configMock);
+            eventMock = 'build_status';
         });
 
         it('validates status', done => {
             buildDataMock.status = 22;
             serverMock.event(eventMock);
-            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
             serverMock.events.emit(eventMock, buildDataMock);
 
             process.nextTick(() => {
@@ -931,7 +933,7 @@ describe('index', () => {
         it('validates slack settings', done => {
             buildDataMock.settings.slack = { room: 'wrongKey', minimized: true };
             serverMock.event(eventMock);
-            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
             serverMock.events.emit(eventMock, buildDataMock);
 
             process.nextTick(() => {
@@ -944,8 +946,104 @@ describe('index', () => {
             const buildDataMockInvalid = ['this', 'is', 'wrong'];
 
             serverMock.event(eventMock);
-            serverMock.events.on(eventMock, data => notifier.notify(data));
+            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
             serverMock.events.emit(eventMock, buildDataMockInvalid);
+
+            process.nextTick(() => {
+                assert.notCalled(WebClientConstructorMock.WebClient);
+                done();
+            });
+        });
+    });
+
+    describe('jobData is validated', () => {
+        beforeEach(() => {
+            serverMock = new Hapi.Server();
+            configMock = {
+                token: 'faketoken'
+            };
+            jobDataMock = {
+                settings: {
+                    slack: {
+                        channels: ['notifyme', 'notifyyou'],
+                        statuses: ['SUCCESS', 'FAILURE']
+                    }
+                },
+                status: 'SUCCESS',
+                pipeline: {
+                    id: '123',
+                    scmRepo: {
+                        name: 'screwdriver-cd/notifications'
+                    }
+                },
+                jobName: 'publish',
+                message: 'something went wrong',
+                pipelineLink: 'http://thisisaSDtest.com/pipelines/12'
+            };
+
+            notifier = new SlackNotifier(configMock);
+            eventMock = 'job_status';
+        });
+
+        it('allows additional notifications plugins in jobDataMock.settings', done => {
+            jobDataMock.settings.hipchat = {
+                awesome: 'sauce',
+                catch: 22
+            };
+
+            serverMock.event(eventMock);
+            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
+            serverMock.events.emit(eventMock, jobDataMock);
+
+            process.nextTick(() => {
+                assert.calledWith(WebClientConstructorMock.WebClient, configMock.token);
+                done();
+            });
+        });
+
+        it('returns when jobDataMock.settings is empty', done => {
+            delete jobDataMock.settings.slack;
+
+            serverMock.event(eventMock);
+            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
+            serverMock.events.emit(eventMock, jobDataMock);
+
+            process.nextTick(() => {
+                assert.notCalled(WebClientConstructorMock.WebClient);
+                done();
+            });
+        });
+
+        it('validates status', done => {
+            jobDataMock.status = 22;
+            serverMock.event(eventMock);
+            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
+            serverMock.events.emit(eventMock, jobDataMock);
+
+            process.nextTick(() => {
+                assert.notCalled(WebClientConstructorMock.WebClient);
+                done();
+            });
+        });
+
+        it('validates slack settings', done => {
+            jobDataMock.settings.slack = { room: 'wrongKey', minimized: true };
+            serverMock.event(eventMock);
+            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
+            serverMock.events.emit(eventMock, jobDataMock);
+
+            process.nextTick(() => {
+                assert.notCalled(WebClientConstructorMock.WebClient);
+                done();
+            });
+        });
+
+        it('validates jobData format', done => {
+            const jobDataMockInvalid = ['this', 'is', 'wrong'];
+
+            serverMock.event(eventMock);
+            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
+            serverMock.events.emit(eventMock, jobDataMockInvalid);
 
             process.nextTick(() => {
                 assert.notCalled(WebClientConstructorMock.WebClient);
