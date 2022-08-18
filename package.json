@@ -5,12 +5,11 @@
   "main": "index.js",
   "scripts": {
     "pretest": "eslint .",
-    "test": "nyc --report-dir ./artifacts/coverage --reporter=lcov mocha --reporter mocha-multi-reporters --reporter-options configFile=./mocha.config.json --recursive --timeout 4000 --retries 1 --exit --allow-uncaught true --color true",
-    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
+    "test": "nyc --report-dir ./artifacts/coverage --reporter=lcov mocha --reporter mocha-multi-reporters --reporter-options configFile=./mocha.config.json --recursive --timeout 4000 --retries 1 --exit --allow-uncaught true --color true"
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:screwdriver-cd/notifications-slack.git"
+    "url": "git+https://github.com/screwdriver-cd/notifications-slack.git"
   },
   "homepage": "https://github.com/screwdriver-cd/notifications-slack",
   "bugs": "https://github.com/screwdriver-cd/screwdriver/issues",
@@ -47,14 +46,11 @@
     "@slack/web-api": "^6.4.0",
     "joi": "^17.4.0",
     "samsam": "^1.3.0",
-    "screwdriver-data-schema": "^21.0.0",
+    "screwdriver-data-schema": "^21.28.1",
     "screwdriver-logger": "^1.0.2",
-    "screwdriver-notifications-base": "^3.0.3"
+    "screwdriver-notifications-base": "^3.2.0"
   },
   "release": {
-    "debug": false,
-    "verifyConditions": {
-      "path": "./node_modules/semantic-release/src/lib/plugin-noop.js"
-    }
+    "debug": false
   }
 }
