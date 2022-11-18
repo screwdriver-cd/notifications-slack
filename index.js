@@ -35,13 +35,9 @@ const STATUSES_MAP = {
     FROZEN: ':snowman:'
 };
 const DEFAULT_STATUSES = ['FAILURE'];
-const SCHEMA_STATUSES = Joi.array()
-    .items(schema.plugins.notifications.schemaStatus)
-    .min(0);
+const SCHEMA_STATUSES = Joi.array().items(schema.plugins.notifications.schemaStatus).min(0);
 const SCHEMA_SLACK_CHANNEL = Joi.string().required();
-const SCHEMA_SLACK_CHANNELS = Joi.array()
-    .items(SCHEMA_SLACK_CHANNEL)
-    .min(1);
+const SCHEMA_SLACK_CHANNELS = Joi.array().items(SCHEMA_SLACK_CHANNEL).min(1);
 const SCHEMA_SLACK_SETTINGS = Joi.object()
     .keys({
         slack: Joi.alternatives()
