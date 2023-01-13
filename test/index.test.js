@@ -250,11 +250,29 @@ describe('index', () => {
                     creator: { username: 'foo' },
                     commit: {
                         author: { name: 'foo' },
-                        message: 'fixing a bug'
+                        message: 'fixing a bug',
+                        url: 'http://scmtest/org/repo/commit/123456'
                     },
                     sha: '1234567890abcdeffedcba098765432100000000'
                 },
                 buildLink: 'http://thisisaSDtest.com/pipelines/12/builds/1234'
+            };
+
+            const postMessagePayloadData = {
+                channel: 'meeseeks',
+                text: '*FAILURE* :umbrella: <http://thisisaSDtest.com/pipelines/12|screwdriver-cd/notifications publish>',
+                as_user: true,
+                attachments: [
+                    {
+                        fallback: '',
+                        color: 'danger',
+                        title: '#1234',
+                        title_link: 'http://thisisaSDtest.com/pipelines/12/builds/1234',
+                        text:
+                            'fixing a bug (<http://scmtest/org/repo/commit/123456|123456>)\n' +
+                            'Merge pull request #26 from screwdriver-cd/notifications'
+                    }
+                ]
             };
 
             serverMock.event(eventMock);
@@ -262,7 +280,64 @@ describe('index', () => {
             serverMock.events.emit(eventMock, buildDataMockSimple);
 
             process.nextTick(() => {
-                assert.calledOnce(WebClientMock.chat.postMessage);
+                assert.calledWith(WebClientMock.chat.postMessage, postMessagePayloadData);
+                done();
+            });
+        });
+
+        it('sets channels and statuses for simple slack string name for PR builds.', done => {
+            const buildDataMockSimple = {
+                settings: {
+                    slack: 'meeseeks'
+                },
+                status: 'FAILURE',
+                pipeline: {
+                    id: '123',
+                    scmRepo: {
+                        name: 'screwdriver-cd/notifications'
+                    }
+                },
+                jobName: 'PR-1:publish',
+                build: {
+                    id: '1234'
+                },
+                event: {
+                    id: '12345',
+                    causeMessage: 'Merge pull request #26 from screwdriver-cd/notifications',
+                    creator: { username: 'foo' },
+                    commit: {
+                        author: { name: 'foo' },
+                        message: 'fixing a bug',
+                        url: 'http://scmtest/org/repo/commit/123456'
+                    },
+                    sha: '1234567890abcdeffedcba098765432100000000'
+                },
+                buildLink: 'http://thisisaSDtest.com/pipelines/12/builds/1234'
+            };
+
+            const postMessagePayloadData = {
+                channel: 'meeseeks',
+                text: '*FAILURE* :umbrella: <http://thisisaSDtest.com/pipelines/12/pulls|screwdriver-cd/notifications PR-1:publish>',
+                as_user: true,
+                attachments: [
+                    {
+                        fallback: '',
+                        color: 'danger',
+                        title: '#1234',
+                        title_link: 'http://thisisaSDtest.com/pipelines/12/builds/1234',
+                        text:
+                            'fixing a bug (<http://scmtest/org/repo/commit/123456|123456>)\n' +
+                            'Merge pull request #26 from screwdriver-cd/notifications'
+                    }
+                ]
+            };
+
+            serverMock.event(eventMock);
+            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
+            serverMock.events.emit(eventMock, buildDataMockSimple);
+
+            process.nextTick(() => {
+                assert.calledWith(WebClientMock.chat.postMessage, postMessagePayloadData);
                 done();
             });
         });

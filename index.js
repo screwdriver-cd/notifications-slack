@@ -134,7 +134,9 @@ function buildStatus(buildData, config) {
         return;
     }
 
-    const pipelineLink = buildData.buildLink.split('/builds')[0];
+    const pipelineLink = /^PR-/.test(buildData.jobName)
+        ? `${buildData.buildLink.split('/builds')[0]}/pulls`
+        : buildData.buildLink.split('/builds')[0];
     const truncatedSha = buildData.event.sha.slice(0, 6);
     const cutOff = 150;
     const commitMessage =
