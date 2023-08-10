@@ -62,7 +62,16 @@ const SCHEMA_JOB_DATA = Joi.object().keys({
     settings: SCHEMA_SLACK_SETTINGS.required()
 });
 const SCHEMA_SLACK_CONFIG = Joi.object().keys({
-    token: Joi.string().required()
+    defaultWorkspace: Joi.string().required(),
+    workspaces: Joi.object()
+        .unknown()
+        .pattern(
+            Joi.string(),
+            Joi.object().keys({
+                token: Joi.string().required()
+            })
+        )
+        .required()
 });
 
 /**
@@ -205,7 +214,7 @@ function buildStatus(buildData, config) {
         attachments
     };
 
-    slacker(config.token, buildData.settings.slack.channels, slackMessage);
+    slacker(config, buildData.settings.slack.channels, slackMessage);
 }
 
 /**
@@ -251,7 +260,7 @@ function jobStatus(jobData, config) {
         message
     };
 
-    slacker(config.token, jobData.settings.slack.channels, slackMessage);
+    slacker(config, jobData.settings.slack.channels, slackMessage);
 }
 
 class SlackNotifier extends NotificationBase {
