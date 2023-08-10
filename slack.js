@@ -24,7 +24,7 @@ function parseSlackConfig(config, channelConfig) {
     const workspaceConfig = config.workspaces[workspace];
 
     if (!workspaceConfig) {
-        logger.error(`Cannot find slack token of ${workspace}.`);
+        logger.error(`Cannot find Slack token for ${workspace}.`);
 
         return {};
     }
