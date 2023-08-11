@@ -63,7 +63,11 @@ describe('index', () => {
         beforeEach(() => {
             serverMock = new Hapi.Server();
             configMock = {
-                token: 'y353e5y45'
+                defaultWorkspace: 'test1',
+                workspaces: {
+                    test1: { token: 'test-token1' },
+                    test2: { token: 'test-token2' }
+                }
             };
             buildDataMock = {
                 settings: {
@@ -105,7 +109,51 @@ describe('index', () => {
             serverMock.events.emit(eventMock, buildDataMock);
 
             process.nextTick(() => {
-                assert.calledWith(WebClientConstructorMock.WebClient, configMock.token);
+                assert.calledWith(WebClientConstructorMock.WebClient, configMock.workspaces.test1.token);
+                assert.calledThrice(WebClientMock.chat.postMessage);
+                done();
+            });
+        });
+
+        it('verifies that included multi workspaces slack notifier', done => {
+            const buildDataMultiWOrkspaceMock = {
+                settings: {
+                    slack: {
+                        channels: ['meeseeks', 'test1:caaaandoooo', 'test2:aaa'],
+                        statuses: ['SUCCESS']
+                    }
+                },
+                status: 'SUCCESS',
+                pipeline: {
+                    id: '123',
+                    scmRepo: {
+                        name: 'screwdriver-cd/notifications',
+                        url: 'http://scmtest/master'
+                    }
+                },
+                jobName: 'publish',
+                build: { id: '1234' },
+                event: {
+                    id: '12345',
+                    causeMessage: 'Merge pull request #26 from screwdriver-cd/notifications',
+                    creator: { username: 'foo' },
+                    commit: {
+                        author: { name: 'foo' },
+                        message: 'fixing a bug'
+                    },
+                    sha: '1234567890abcdeffedcba098765432100000000'
+                },
+                buildLink: 'http://thisisaSDtest.com/pipelines/12/builds/1234',
+                isFixed: false
+            };
+
+            serverMock.event(eventMock);
+            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
+            serverMock.events.emit(eventMock, buildDataMultiWOrkspaceMock);
+
+            process.nextTick(() => {
+                assert.calledWith(WebClientConstructorMock.WebClient.firstCall, configMock.workspaces.test1.token);
+                assert.calledWith(WebClientConstructorMock.WebClient.secondCall, configMock.workspaces.test2.token);
                 assert.calledThrice(WebClientMock.chat.postMessage);
                 done();
             });
@@ -118,7 +166,7 @@ describe('index', () => {
             serverMock.events.emit(eventMock, buildDataMock);
 
             process.nextTick(() => {
-                assert.calledWith(WebClientConstructorMock.WebClient, configMock.token);
+                assert.calledWith(WebClientConstructorMock.WebClient, configMock.workspaces.test1.token);
                 assert.calledThrice(WebClientMock.chat.postMessage);
                 done();
             });
@@ -920,7 +968,7 @@ describe('index', () => {
             serverMock.events.emit(eventMock, buildDataMock);
 
             process.nextTick(() => {
-                assert.calledWith(WebClientConstructorMock.WebClient, configMock.token);
+                assert.calledWith(WebClientConstructorMock.WebClient, configMock.workspaces.test1.token);
                 done();
             });
         });
@@ -940,8 +988,42 @@ describe('index', () => {
     });
 
     describe('config is validated', () => {
-        it('validates token', () => {
-            configMock = {};
+        it('validates defaultWorkspace', () => {
+            configMock = {
+                workspaces: {
+                    test: { token: 'y353e5y45' }
+                }
+            };
+            try {
+                notifier = new SlackNotifier(configMock);
+                assert.fail('should not get here');
+            } catch (err) {
+                assert.instanceOf(err, Error);
+                assert.equal(err.name, 'ValidationError');
+            }
+        });
+
+        it('validates workspaces', () => {
+            configMock = {
+                defaultWorkspace: 'test'
+            };
+            try {
+                notifier = new SlackNotifier(configMock);
+                assert.fail('should not get here');
+            } catch (err) {
+                assert.instanceOf(err, Error);
+                assert.equal(err.name, 'ValidationError');
+            }
+        });
+
+        it('validates workspace token', () => {
+            configMock = {
+                defaultWorkspace: 'test1',
+                workspaces: {
+                    test1: { token: 'test-token1' },
+                    test2: {}
+                }
+            };
             try {
                 notifier = new SlackNotifier(configMock);
                 assert.fail('should not get here');
@@ -956,7 +1038,10 @@ describe('index', () => {
         beforeEach(() => {
             serverMock = new Hapi.Server();
             configMock = {
-                token: 'faketoken'
+                defaultWorkspace: 'test',
+                workspaces: {
+                    test: { token: 'y353e5y45' }
+                }
             };
             buildDataMock = {
                 settings: {
@@ -1035,7 +1120,10 @@ describe('index', () => {
         beforeEach(() => {
             serverMock = new Hapi.Server();
             configMock = {
-                token: 'faketoken'
+                defaultWorkspace: 'test',
+                workspaces: {
+                    test: { token: 'y353e5y45' }
+                }
             };
             jobDataMock = {
                 settings: {
@@ -1071,7 +1159,7 @@ describe('index', () => {
             serverMock.events.emit(eventMock, jobDataMock);
 
             process.nextTick(() => {
-                assert.calledWith(WebClientConstructorMock.WebClient, configMock.token);
+                assert.calledWith(WebClientConstructorMock.WebClient, configMock.workspaces.test.token);
                 done();
             });
         });
