@@ -101,7 +101,7 @@ function buildStatus(buildData, config) {
 
     let channelReplacement;
 
-    if (metaDataSlackChannel) {
+    if (metaDataSlackChannel !== false) {
         channelReplacement = metaDataSlackChannel.split(',');
         // Remove empty/blank items.
         channelReplacement = channelReplacement.filter(x => x.trim() !== '');

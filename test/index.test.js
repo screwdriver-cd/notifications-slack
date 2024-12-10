@@ -774,6 +774,54 @@ describe('index', () => {
             });
         });
 
+        it('channel meta data overwrite. All channels down by empty string', done => {
+            const buildDataMockArray = {
+                settings: {
+                    slack: ['meeseeks', 'second']
+                },
+                status: 'FAILURE',
+                pipeline: {
+                    id: '123',
+                    scmRepo: {
+                        name: 'screwdriver-cd/notifications'
+                    }
+                },
+                jobName: 'publish',
+                build: {
+                    id: '1234',
+                    meta: {
+                        notification: {
+                            slack: {
+                                publish: {
+                                    channels: ''
+                                }
+                            }
+                        }
+                    }
+                },
+                event: {
+                    id: '12345',
+                    causeMessage: 'Merge pull request #26 from screwdriver-cd/notifications',
+                    creator: { username: 'foo' },
+                    commit: {
+                        author: { name: 'foo' },
+                        message: 'fixing a bug'
+                    },
+                    sha: '1234567890abcdeffedcba098765432100000000'
+                },
+                buildLink: 'http://thisisaSDtest.com/pipelines/12/builds/1234'
+            };
+
+            serverMock.event(eventMock);
+            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
+            serverMock.events.emit(eventMock, buildDataMockArray);
+
+            process.nextTick(() => {
+                assert.notCalled(WebClientMock.chat.postMessage);
+                done();
+            });
+        });
+
         it('channel meta data overwrite. should not overwrite. wrong job name', done => {
             const buildDataMockArray = {
                 settings: {
