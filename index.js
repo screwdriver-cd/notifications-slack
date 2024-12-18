@@ -45,6 +45,7 @@ const SCHEMA_SLACK_SETTINGS = Joi.object()
                 Joi.object().keys({
                     channels: SCHEMA_SLACK_CHANNELS,
                     statuses: SCHEMA_STATUSES,
+                    message: Joi.string(),
                     minimized: Joi.boolean()
                 }),
                 SCHEMA_SLACK_CHANNELS,
@@ -113,6 +114,7 @@ function buildStatus(buildData, config) {
         buildData.settings.slack = {
             channels: buildData.settings.slack,
             statuses: DEFAULT_STATUSES,
+            message: '',
             minimized: false
         };
     }
@@ -171,15 +173,17 @@ function buildStatus(buildData, config) {
         message = `${message}\n*Source Directory:* ${rootDir}`;
     }
 
+    const defaultMessage = buildData.settings.slack.message;
     const metaMessage = hoek.reach(buildData, 'build.meta.notification.slack.message', { default: false });
-    const metaVar = `build.meta.notification.slack.${buildData.jobName}.message`;
-    const buildMessage = hoek.reach(buildData, metaVar, { default: false });
+    const buildMessage = hoek.reach(buildData, `build.meta.notification.slack.${buildData.jobName}.message`, {
+        default: false
+    });
 
     // Use job specific message over generic message.
-    if (buildMessage) {
-        message = `${message}\n${buildMessage}`;
-    } else if (metaMessage) {
-        message = `${message}\n${metaMessage}`;
+    const specificMessage = buildMessage || metaMessage || defaultMessage || '';
+
+    if (specificMessage) {
+        message = `${message}\n${specificMessage}`;
     }
 
     const attachments = isMinimized
