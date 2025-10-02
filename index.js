@@ -161,11 +161,7 @@ function buildStatus(buildData, config) {
         default: buildData.settings.slack.minimized
     });
 
-    let message = isMinimized
-        ? // eslint-disable-next-line max-len
-          `<${pipelineLink}|${buildData.pipeline.scmRepo.name}#${buildData.jobName}> *${notificationStatus}*`
-        : // eslint-disable-next-line max-len
-          `*${notificationStatus}* ${STATUSES_MAP[notificationStatus]} <${pipelineLink}|${buildData.pipeline.scmRepo.name} ${buildData.jobName}>`;
+    let message = `*${notificationStatus}* ${STATUSES_MAP[notificationStatus]} <${pipelineLink}|${buildData.pipeline.scmRepo.name} ${buildData.jobName}>`;
 
     const rootDir = hoek.reach(buildData, 'pipeline.scmRepo.rootDir', { default: false });
 
@@ -193,7 +189,6 @@ function buildStatus(buildData, config) {
                   color: COLOR_MAP[notificationStatus],
                   fields: [
                       {
-                          title: 'Build',
                           value: `<${buildData.buildLink}|#${buildData.build.id}>`,
                           short: true
                       }
@@ -250,15 +245,9 @@ function jobStatus(jobData, config) {
             minimized: false
         };
     }
-
-    const isMinimized = jobData.settings.slack.minimized;
-    const message = isMinimized
-        ? // eslint-disable-next-line max-len
-          `<${jobData.pipelineLink}|${jobData.pipeline.scmRepo.name}#${jobData.jobName}> *${jobData.status}*\n${jobData.message}`
-        : // eslint-disable-next-line max-len
-          `*${jobData.status}* ${STATUSES_MAP[jobData.status]} <${jobData.pipelineLink}|${
-              jobData.pipeline.scmRepo.name
-          } ${jobData.jobName}>\n${jobData.message}`;
+    const message = `*${jobData.status}* ${STATUSES_MAP[jobData.status]} <${jobData.pipelineLink}|${
+        jobData.pipeline.scmRepo.name
+    } ${jobData.jobName}>\n${jobData.message}`;
 
     const slackMessage = {
         message
