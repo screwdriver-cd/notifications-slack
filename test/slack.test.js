@@ -63,7 +63,8 @@ describe('slack', () => {
             channels = ['meeseeks', 'caaaandoooo'];
             payload = {
                 message: 'build failed',
-                attachments: {}
+                attachments: {},
+                unfurl_links: true
             };
         });
 
@@ -79,13 +80,15 @@ describe('slack', () => {
                     channel: 'meeseeks',
                     text: payload.message,
                     as_user: true,
-                    attachments: payload.attachments
+                    attachments: payload.attachments,
+                    unfurl_links: payload.unfurl_links
                 });
                 assert.calledWith(WebClientMock.chat.postMessage.secondCall, {
                     channel: 'caaaandoooo',
                     text: payload.message,
                     as_user: true,
-                    attachments: payload.attachments
+                    attachments: payload.attachments,
+                    unfurl_links: payload.unfurl_links
                 });
             }));
 
@@ -149,13 +152,15 @@ describe('slack', () => {
                     channel: 'foo',
                     text: payload.message,
                     as_user: true,
-                    attachments: payload.attachments
+                    attachments: payload.attachments,
+                    unfurl_links: payload.unfurl_links
                 });
                 assert.calledWith(WebClientMock1.chat.postMessage.secondCall, {
                     channel: 'bar',
                     text: payload.message,
                     as_user: true,
-                    attachments: payload.attachments
+                    attachments: payload.attachments,
+                    unfurl_links: payload.unfurl_links
                 });
 
                 assert.calledTwice(WebClientMock2.chat.postMessage);
@@ -163,13 +168,15 @@ describe('slack', () => {
                     channel: 'bar',
                     text: payload.message,
                     as_user: true,
-                    attachments: payload.attachments
+                    attachments: payload.attachments,
+                    unfurl_links: payload.unfurl_links
                 });
                 assert.calledWith(WebClientMock2.chat.postMessage.secondCall, {
                     channel: 'baz',
                     text: payload.message,
                     as_user: true,
-                    attachments: payload.attachments
+                    attachments: payload.attachments,
+                    unfurl_links: payload.unfurl_links
                 });
             });
         });

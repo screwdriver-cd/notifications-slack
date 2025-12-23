@@ -320,7 +320,8 @@ describe('index', () => {
                             'fixing a bug (<http://scmtest/org/repo/commit/123456|123456>)\n' +
                             'Merge pull request #26 from screwdriver-cd/notifications'
                     }
-                ]
+                ],
+                unfurl_links: true
             };
 
             serverMock.event(eventMock);
@@ -377,7 +378,8 @@ describe('index', () => {
                             'fixing a bug (<http://scmtest/org/repo/commit/123456|123456>)\n' +
                             'Merge pull request #26 from screwdriver-cd/notifications'
                     }
-                ]
+                ],
+                unfurl_links: true
             };
 
             serverMock.event(eventMock);
@@ -1005,84 +1007,229 @@ describe('index', () => {
             });
         });
 
-        it('default message data overwrite.', done => {
-            const buildDataMockArray = {
-                settings: {
-                    slack: {
-                        channels: ['meeseeks'],
-                        message: 'Default additional message'
-                    }
-                },
-                status: 'FAILURE',
-                pipeline: {
-                    id: '123',
-                    scmRepo: {
-                        name: 'screwdriver-cd/notifications'
-                    }
-                },
-                jobName: 'publish',
-                build: {
-                    id: '1234'
-                },
-                event: {
-                    id: '12345',
-                    causeMessage: 'Merge pull request #26 from screwdriver-cd/notifications',
-                    creator: { username: 'foo' },
-                    commit: {
-                        author: { name: 'foo' },
-                        message: 'fixing a bug',
-                        url: 'http://scmtest/org/repo/commit/123456'
+        describe('customize additional message', () => {
+            const failureAttachments = [
+                {
+                    fallback: '',
+                    color: 'danger',
+                    title: '#1234',
+                    title_link: 'http://thisisaSDtest.com/pipelines/12/builds/1234',
+                    text:
+                        'fixing a bug (<http://scmtest/org/repo/commit/123456|123456>)\n' +
+                        'Merge pull request #26 from screwdriver-cd/notifications'
+                }
+            ];
+            const successAttachments = [
+                {
+                    fallback: '',
+                    color: 'good',
+                    title: '#1234',
+                    title_link: 'http://thisisaSDtest.com/pipelines/12/builds/1234',
+                    text:
+                        'fixing a bug (<http://scmtest/org/repo/commit/123456|123456>)\n' +
+                        'Merge pull request #26 from screwdriver-cd/notifications'
+                }
+            ];
+            const runningAttachments = [
+                {
+                    fallback: '',
+                    color: '#0F69FF',
+                    title: '#1234',
+                    title_link: 'http://thisisaSDtest.com/pipelines/12/builds/1234',
+                    text:
+                        'fixing a bug (<http://scmtest/org/repo/commit/123456|123456>)\n' +
+                        'Merge pull request #26 from screwdriver-cd/notifications'
+                }
+            ];
+            let buildDataMockArray;
+
+            beforeEach(() => {
+                buildDataMockArray = {
+                    settings: {
+                        slack: {
+                            channels: ['meeseeks'],
+                            statuses: ['SUCCESS', 'FAILURE', 'RUNNING']
+                        }
                     },
-                    sha: '1234567890abcdeffedcba098765432100000000'
-                },
-                buildLink: 'http://thisisaSDtest.com/pipelines/12/builds/1234'
-            };
-
-            const postMessagePayloadData = {
-                channel: 'meeseeks',
-                text: '*FAILURE* :umbrella: <http://thisisaSDtest.com/pipelines/12|screwdriver-cd/notifications publish>\nDefault additional message',
-                as_user: true,
-                attachments: [
-                    {
-                        fallback: '',
-                        color: 'danger',
-                        title: '#1234',
-                        title_link: 'http://thisisaSDtest.com/pipelines/12/builds/1234',
-                        text:
-                            'fixing a bug (<http://scmtest/org/repo/commit/123456|123456>)\n' +
-                            'Merge pull request #26 from screwdriver-cd/notifications'
-                    }
-                ]
-            };
-
-            serverMock.event(eventMock);
-            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
-            serverMock.events.emit(eventMock, buildDataMockArray);
-
-            process.nextTick(() => {
-                assert.calledOnce(WebClientMock.chat.postMessage);
-                assert.calledWith(WebClientMock.chat.postMessage, postMessagePayloadData);
-                done();
+                    status: 'SUCCESS',
+                    pipeline: {
+                        id: '123',
+                        scmRepo: {
+                            name: 'screwdriver-cd/notifications'
+                        }
+                    },
+                    jobName: 'publish',
+                    build: {
+                        id: '1234'
+                    },
+                    event: {
+                        id: '12345',
+                        causeMessage: 'Merge pull request #26 from screwdriver-cd/notifications',
+                        creator: { username: 'foo' },
+                        commit: {
+                            author: { name: 'foo' },
+                            message: 'fixing a bug',
+                            url: 'http://scmtest/org/repo/commit/123456'
+                        },
+                        sha: '1234567890abcdeffedcba098765432100000000'
+                    },
+                    buildLink: 'http://thisisaSDtest.com/pipelines/12/builds/1234'
+                };
             });
-        });
 
-        it('message meta data overwrite.', done => {
-            const buildDataMockArray = {
-                settings: {
-                    slack: {
-                        channels: ['meeseeks'],
-                        message: 'Default additional message'
-                    }
-                },
-                status: 'FAILURE',
-                pipeline: {
-                    id: '123',
-                    scmRepo: {
-                        name: 'screwdriver-cd/notifications'
-                    }
-                },
-                jobName: 'publish',
-                build: {
+            it('set default additional message directly', done => {
+                buildDataMockArray.settings.slack.message = 'Default additional message';
+
+                const postMessagePayloadData = {
+                    channel: 'meeseeks',
+                    text: '*SUCCESS* :sunny: <http://thisisaSDtest.com/pipelines/12|screwdriver-cd/notifications publish>\nDefault additional message',
+                    as_user: true,
+                    attachments: successAttachments,
+                    unfurl_links: true
+                };
+
+                serverMock.event(eventMock);
+                serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
+                serverMock.events.emit(eventMock, buildDataMockArray);
+
+                process.nextTick(() => {
+                    assert.calledOnce(WebClientMock.chat.postMessage);
+                    assert.calledWith(WebClientMock.chat.postMessage, postMessagePayloadData);
+                    done();
+                });
+            });
+
+            it('set success additional message', done => {
+                buildDataMockArray.settings.slack.message = {
+                    default: 'default additional message',
+                    success: 'success additional message'
+                };
+
+                const postMessagePayloadData = {
+                    channel: 'meeseeks',
+                    text: '*SUCCESS* :sunny: <http://thisisaSDtest.com/pipelines/12|screwdriver-cd/notifications publish>\nsuccess additional message',
+                    as_user: true,
+                    attachments: successAttachments,
+                    unfurl_links: true
+                };
+
+                serverMock.event(eventMock);
+                serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
+                serverMock.events.emit(eventMock, buildDataMockArray);
+
+                process.nextTick(() => {
+                    assert.calledOnce(WebClientMock.chat.postMessage);
+                    assert.calledWith(WebClientMock.chat.postMessage, postMessagePayloadData);
+                    done();
+                });
+            });
+
+            it('set failure additional message', done => {
+                buildDataMockArray.status = 'FAILURE';
+                buildDataMockArray.settings.slack.message = {
+                    failure: 'failure additional message'
+                };
+
+                const postMessagePayloadData = {
+                    channel: 'meeseeks',
+                    text: '*FAILURE* :umbrella: <http://thisisaSDtest.com/pipelines/12|screwdriver-cd/notifications publish>\nfailure additional message',
+                    as_user: true,
+                    attachments: failureAttachments,
+                    unfurl_links: true
+                };
+
+                serverMock.event(eventMock);
+                serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
+                serverMock.events.emit(eventMock, buildDataMockArray);
+
+                process.nextTick(() => {
+                    assert.calledOnce(WebClientMock.chat.postMessage);
+                    assert.calledWith(WebClientMock.chat.postMessage, postMessagePayloadData);
+                    done();
+                });
+            });
+
+            it('use default additional message on RUNNING build', done => {
+                buildDataMockArray.status = 'RUNNING';
+                buildDataMockArray.settings.slack.message = {
+                    default: 'default additional message',
+                    success: 'success additional message',
+                    failure: 'failure additional message'
+                };
+
+                const postMessagePayloadData = {
+                    channel: 'meeseeks',
+                    text: '*RUNNING* :runner: <http://thisisaSDtest.com/pipelines/12|screwdriver-cd/notifications publish>\ndefault additional message',
+                    as_user: true,
+                    attachments: runningAttachments,
+                    unfurl_links: true
+                };
+
+                serverMock.event(eventMock);
+                serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
+                serverMock.events.emit(eventMock, buildDataMockArray);
+
+                process.nextTick(() => {
+                    assert.calledOnce(WebClientMock.chat.postMessage);
+                    assert.calledWith(WebClientMock.chat.postMessage, postMessagePayloadData);
+                    done();
+                });
+            });
+
+            it('use default additional message on SUCCESS when it does not have success message config', done => {
+                buildDataMockArray.status = 'SUCCESS';
+                buildDataMockArray.settings.slack.message = {
+                    default: 'default additional message',
+                    failure: 'failure additional message'
+                };
+
+                const postMessagePayloadData = {
+                    channel: 'meeseeks',
+                    text: '*SUCCESS* :sunny: <http://thisisaSDtest.com/pipelines/12|screwdriver-cd/notifications publish>\ndefault additional message',
+                    as_user: true,
+                    attachments: successAttachments,
+                    unfurl_links: true
+                };
+
+                serverMock.event(eventMock);
+                serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
+                serverMock.events.emit(eventMock, buildDataMockArray);
+
+                process.nextTick(() => {
+                    assert.calledOnce(WebClientMock.chat.postMessage);
+                    assert.calledWith(WebClientMock.chat.postMessage, postMessagePayloadData);
+                    done();
+                });
+            });
+
+            it('do not use additional message on SUCCESS when it does not have success and default message config', done => {
+                buildDataMockArray.status = 'SUCCESS';
+                buildDataMockArray.settings.slack.message = {
+                    failure: 'failure additional message'
+                };
+
+                const postMessagePayloadData = {
+                    channel: 'meeseeks',
+                    text: '*SUCCESS* :sunny: <http://thisisaSDtest.com/pipelines/12|screwdriver-cd/notifications publish>',
+                    as_user: true,
+                    attachments: successAttachments,
+                    unfurl_links: true
+                };
+
+                serverMock.event(eventMock);
+                serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
+                serverMock.events.emit(eventMock, buildDataMockArray);
+
+                process.nextTick(() => {
+                    assert.calledOnce(WebClientMock.chat.postMessage);
+                    assert.calledWith(WebClientMock.chat.postMessage, postMessagePayloadData);
+                    done();
+                });
+            });
+
+            it('use additional message from metadata as priority', done => {
+                buildDataMockArray.settings.slack.message = 'Default additional message';
+                buildDataMockArray.build = {
                     id: '1234',
                     meta: {
                         notification: {
@@ -1093,65 +1240,29 @@ describe('index', () => {
                             }
                         }
                     }
-                },
-                event: {
-                    id: '12345',
-                    causeMessage: 'Merge pull request #26 from screwdriver-cd/notifications',
-                    creator: { username: 'foo' },
-                    commit: {
-                        author: { name: 'foo' },
-                        message: 'fixing a bug',
-                        url: 'http://scmtest/org/repo/commit/123456'
-                    },
-                    sha: '1234567890abcdeffedcba098765432100000000'
-                },
-                buildLink: 'http://thisisaSDtest.com/pipelines/12/builds/1234'
-            };
+                };
 
-            const postMessagePayloadData = {
-                channel: 'meeseeks',
-                text: '*FAILURE* :umbrella: <http://thisisaSDtest.com/pipelines/12|screwdriver-cd/notifications publish>\nAdditional meta message',
-                as_user: true,
-                attachments: [
-                    {
-                        fallback: '',
-                        color: 'danger',
-                        title: '#1234',
-                        title_link: 'http://thisisaSDtest.com/pipelines/12/builds/1234',
-                        text:
-                            'fixing a bug (<http://scmtest/org/repo/commit/123456|123456>)\n' +
-                            'Merge pull request #26 from screwdriver-cd/notifications'
-                    }
-                ]
-            };
+                const postMessagePayloadData = {
+                    channel: 'meeseeks',
+                    text: '*SUCCESS* :sunny: <http://thisisaSDtest.com/pipelines/12|screwdriver-cd/notifications publish>\nAdditional meta message',
+                    as_user: true,
+                    attachments: successAttachments,
+                    unfurl_links: true
+                };
 
-            serverMock.event(eventMock);
-            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
-            serverMock.events.emit(eventMock, buildDataMockArray);
+                serverMock.event(eventMock);
+                serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
+                serverMock.events.emit(eventMock, buildDataMockArray);
 
-            process.nextTick(() => {
-                assert.calledOnce(WebClientMock.chat.postMessage);
-                assert.calledWith(WebClientMock.chat.postMessage, postMessagePayloadData);
-                done();
+                process.nextTick(() => {
+                    assert.calledOnce(WebClientMock.chat.postMessage);
+                    assert.calledWith(WebClientMock.chat.postMessage, postMessagePayloadData);
+                    done();
+                });
             });
-        });
 
-        it('message meta data overwrite. should not overwrite. wrong job name', done => {
-            const buildDataMockArray = {
-                settings: {
-                    slack: {
-                        channels: ['meeseeks']
-                    }
-                },
-                status: 'FAILURE',
-                pipeline: {
-                    id: '123',
-                    scmRepo: {
-                        name: 'screwdriver-cd/notifications'
-                    }
-                },
-                jobName: 'publish',
-                build: {
+            it('do not use additonal message from metadata when it is in wrong job name', done => {
+                buildDataMockArray.build = {
                     id: '1234',
                     meta: {
                         notification: {
@@ -1162,46 +1273,49 @@ describe('index', () => {
                             }
                         }
                     }
-                },
-                event: {
-                    id: '12345',
-                    causeMessage: 'Merge pull request #26 from screwdriver-cd/notifications',
-                    creator: { username: 'foo' },
-                    commit: {
-                        author: { name: 'foo' },
-                        message: 'fixing a bug',
-                        url: 'http://scmtest/org/repo/commit/123456'
-                    },
-                    sha: '1234567890abcdeffedcba098765432100000000'
-                },
-                buildLink: 'http://thisisaSDtest.com/pipelines/12/builds/1234'
-            };
+                };
 
-            const postMessagePayloadData = {
-                channel: 'meeseeks',
-                text: '*FAILURE* :umbrella: <http://thisisaSDtest.com/pipelines/12|screwdriver-cd/notifications publish>',
-                as_user: true,
-                attachments: [
-                    {
-                        fallback: '',
-                        color: 'danger',
-                        title: '#1234',
-                        title_link: 'http://thisisaSDtest.com/pipelines/12/builds/1234',
-                        text:
-                            'fixing a bug (<http://scmtest/org/repo/commit/123456|123456>)\n' +
-                            'Merge pull request #26 from screwdriver-cd/notifications'
-                    }
-                ]
-            };
+                const postMessagePayloadData = {
+                    channel: 'meeseeks',
+                    text: '*SUCCESS* :sunny: <http://thisisaSDtest.com/pipelines/12|screwdriver-cd/notifications publish>',
+                    as_user: true,
+                    attachments: successAttachments,
+                    unfurl_links: true
+                };
 
-            serverMock.event(eventMock);
-            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
-            serverMock.events.emit(eventMock, buildDataMockArray);
+                serverMock.event(eventMock);
+                serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
+                serverMock.events.emit(eventMock, buildDataMockArray);
 
-            process.nextTick(() => {
-                assert.calledOnce(WebClientMock.chat.postMessage);
-                assert.calledWith(WebClientMock.chat.postMessage, postMessagePayloadData);
-                done();
+                process.nextTick(() => {
+                    assert.calledOnce(WebClientMock.chat.postMessage);
+                    assert.calledWith(WebClientMock.chat.postMessage, postMessagePayloadData);
+                    done();
+                });
+            });
+
+            it('set unfurl_links to false', done => {
+                buildDataMockArray.settings.slack.message = {
+                    unfurl_links: false
+                };
+
+                const postMessagePayloadData = {
+                    channel: 'meeseeks',
+                    text: '*SUCCESS* :sunny: <http://thisisaSDtest.com/pipelines/12|screwdriver-cd/notifications publish>',
+                    as_user: true,
+                    attachments: successAttachments,
+                    unfurl_links: false
+                };
+
+                serverMock.event(eventMock);
+                serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
+                serverMock.events.emit(eventMock, buildDataMockArray);
+
+                process.nextTick(() => {
+                    assert.calledOnce(WebClientMock.chat.postMessage);
+                    assert.calledWith(WebClientMock.chat.postMessage, postMessagePayloadData);
+                    done();
+                });
             });
         });
 
