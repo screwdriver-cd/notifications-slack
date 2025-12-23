@@ -47,7 +47,8 @@ function postMessage(channel, web, payload) {
             channel,
             text: payload.message,
             as_user: true,
-            attachments: payload.attachments
+            attachments: payload.attachments,
+            unfurl_links: payload.unfurl_links
         })
         .catch(err => logger.error(`postMessage: failed to notify Slack channel ${channel}: ${err.message}`));
 }

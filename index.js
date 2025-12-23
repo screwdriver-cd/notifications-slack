@@ -34,10 +34,29 @@ const STATUSES_MAP = {
     FIXED: ':sunny:',
     FROZEN: ':snowman:'
 };
+const MESSAGE_MAP = {
+    ABORTED: 'failure',
+    CREATED: 'default',
+    FAILURE: 'failure',
+    QUEUED: 'default',
+    RUNNING: 'default',
+    SUCCESS: 'success',
+    BLOCKED: 'default',
+    UNSTABLE: 'default',
+    COLLAPSED: 'default',
+    FIXED: 'success',
+    FROZEN: 'default'
+};
 const DEFAULT_STATUSES = ['FAILURE'];
 const SCHEMA_STATUSES = Joi.array().items(schema.plugins.notifications.schemaStatus).min(0);
 const SCHEMA_SLACK_CHANNEL = Joi.string().required();
 const SCHEMA_SLACK_CHANNELS = Joi.array().items(SCHEMA_SLACK_CHANNEL).min(1);
+const SCHEMA_SLACK_MESSAGE = Joi.object().keys({
+    default: Joi.string(),
+    success: Joi.string(),
+    failure: Joi.string(),
+    unfurl_links: Joi.boolean()
+});
 const SCHEMA_SLACK_SETTINGS = Joi.object()
     .keys({
         slack: Joi.alternatives()
@@ -45,7 +64,7 @@ const SCHEMA_SLACK_SETTINGS = Joi.object()
                 Joi.object().keys({
                     channels: SCHEMA_SLACK_CHANNELS,
                     statuses: SCHEMA_STATUSES,
-                    message: Joi.string(),
+                    message: Joi.alternatives().try(SCHEMA_SLACK_MESSAGE, Joi.string()),
                     minimized: Joi.boolean()
                 }),
                 SCHEMA_SLACK_CHANNELS,
@@ -169,14 +188,19 @@ function buildStatus(buildData, config) {
         message = `${message}\n*Source Directory:* ${rootDir}`;
     }
 
-    const defaultMessage = buildData.settings.slack.message;
+    const messageConfig =
+        typeof buildData.settings.slack.message === 'string'
+            ? { default: buildData.settings.slack.message }
+            : buildData.settings.slack.message;
+    const defaultMessage = hoek.reach(messageConfig, 'default', { default: false });
+    const predefinedMessage = hoek.reach(messageConfig, MESSAGE_MAP[notificationStatus], { default: false });
     const metaMessage = hoek.reach(buildData, 'build.meta.notification.slack.message', { default: false });
     const buildMessage = hoek.reach(buildData, `build.meta.notification.slack.${buildData.jobName}.message`, {
         default: false
     });
 
     // Use job specific message over generic message.
-    const specificMessage = buildMessage || metaMessage || defaultMessage || '';
+    const specificMessage = buildMessage || metaMessage || predefinedMessage || defaultMessage || '';
 
     if (specificMessage) {
         message = `${message}\n${specificMessage}`;
@@ -210,7 +234,8 @@ function buildStatus(buildData, config) {
 
     const slackMessage = {
         message,
-        attachments
+        attachments,
+        unfurl_links: hoek.reach(messageConfig, 'unfurl_links', { default: true })
     };
 
     slacker(config, buildData.settings.slack.channels, slackMessage);
