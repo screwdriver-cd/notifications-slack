@@ -43,7 +43,7 @@
   "dependencies": {
     "@hapi/hapi": "^21.0.0",
     "@hapi/hoek": "^11.0.7",
-    "@slack/web-api": "^7.8.0",
+    "@slack/web-api": "^7.15.1",
     "joi": "^17.13.3",
     "screwdriver-data-schema": "^25.0.0",
     "screwdriver-logger": "^3.0.0",
