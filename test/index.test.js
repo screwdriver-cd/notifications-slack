@@ -1675,4 +1675,137 @@ describe('index', () => {
             assert.equal(error.name, 'ValidationError');
         });
     });
+
+    describe('security - Slack mrkdwn injection', () => {
+        const emit = () => {
+            serverMock.event(eventMock);
+            serverMock.events.on(eventMock, data => notifier.notify(eventMock, data));
+            serverMock.events.emit(eventMock, buildDataMock);
+        };
+
+        beforeEach(() => {
+            serverMock = new Hapi.Server();
+            configMock = {
+                defaultWorkspace: 'test1',
+                workspaces: {
+                    test1: { token: 'test-token1' }
+                }
+            };
+            buildDataMock = {
+                settings: {
+                    slack: {
+                        channels: ['meeseeks'],
+                        statuses: ['SUCCESS']
+                    }
+                },
+                status: 'SUCCESS',
+                pipeline: {
+                    id: '123',
+                    scmRepo: {
+                        name: 'screwdriver-cd/notifications'
+                    }
+                },
+                jobName: 'publish',
+                build: { id: '1234' },
+                event: {
+                    id: '12345',
+                    causeMessage: 'Merge pull request #26 from screwdriver-cd/notifications',
+                    creator: { username: 'foo' },
+                    commit: {
+                        author: { name: 'foo' },
+                        message: 'fixing a bug',
+                        url: 'http://scmtest/org/repo/commit/123456'
+                    },
+                    sha: '1234567890abcdeffedcba098765432100000000'
+                },
+                buildLink: 'http://thisisaSDtest.com/pipelines/12/builds/1234',
+                isFixed: false
+            };
+            notifier = new SlackNotifier(configMock);
+            eventMock = 'build_status';
+        });
+
+        it('escapes mrkdwn link syntax in the commit message', done => {
+            buildDataMock.event.commit.message = 'Fix auth bug <https://attacker.com/harvest|View patch details>';
+
+            emit();
+
+            process.nextTick(() => {
+                const { text } = WebClientMock.chat.postMessage.firstCall.lastArg.attachments[0];
+
+                assert.notInclude(text, '<https://attacker.com/harvest|View patch details>');
+                assert.include(text, 'Fix auth bug &lt;https://attacker.com/harvest|View patch details&gt;');
+                done();
+            });
+        });
+
+        it('escapes mrkdwn link syntax in the cause message', done => {
+            buildDataMock.event.causeMessage = 'Merged by <https://attacker.com/harvest|the security team>';
+
+            emit();
+
+            process.nextTick(() => {
+                const { text } = WebClientMock.chat.postMessage.firstCall.lastArg.attachments[0];
+
+                assert.notInclude(text, '<https://attacker.com/harvest|the security team>');
+                assert.include(text, 'Merged by &lt;https://attacker.com/harvest|the security team&gt;');
+                done();
+            });
+        });
+
+        it('escapes each control character exactly once', done => {
+            buildDataMock.event.commit.message = 'Handle A & B <foo> &amp;';
+
+            emit();
+
+            process.nextTick(() => {
+                const { text } = WebClientMock.chat.postMessage.firstCall.lastArg.attachments[0];
+
+                assert.include(text, 'Handle A &amp; B &lt;foo&gt; &amp;amp;');
+                done();
+            });
+        });
+
+        it('escapes after truncation and keeps the commit link intact', done => {
+            buildDataMock.event.commit.message = `<${'a'.repeat(200)}`;
+
+            emit();
+
+            process.nextTick(() => {
+                const { text } = WebClientMock.chat.postMessage.firstCall.lastArg.attachments[0];
+
+                assert.include(text, `&lt;${'a'.repeat(149)}...`);
+                assert.include(text, '(<http://scmtest/org/repo/commit/123456|123456>)');
+                done();
+            });
+        });
+
+        it('leaves messages without control characters unchanged', done => {
+            emit();
+
+            process.nextTick(() => {
+                const { text } = WebClientMock.chat.postMessage.firstCall.lastArg.attachments[0];
+
+                assert.equal(
+                    text,
+                    'fixing a bug (<http://scmtest/org/repo/commit/123456|123456>)\n' +
+                        'Merge pull request #26 from screwdriver-cd/notifications'
+                );
+                done();
+            });
+        });
+
+        it('does not escape the pipeline configured notification message', done => {
+            buildDataMock.settings.slack.message = 'See <https://example.com/runbook|the runbook>';
+
+            emit();
+
+            process.nextTick(() => {
+                const { text } = WebClientMock.chat.postMessage.firstCall.lastArg;
+
+                assert.include(text, 'See <https://example.com/runbook|the runbook>');
+                done();
+            });
+        });
+    });
 });

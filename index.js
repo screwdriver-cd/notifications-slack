@@ -6,6 +6,29 @@ const schema = require('screwdriver-data-schema');
 const hoek = require('@hapi/hoek');
 const slacker = require('./slack');
 
+/**
+ * Escape the characters Slack treats as mrkdwn control characters so that
+ * untrusted content (commit messages, cause messages) is rendered as literal
+ * text instead of markup such as `<url|label>` links.
+ * https://api.slack.com/reference/surfaces/formatting#escaping
+ * @method escapeSlackText
+ * @param  {String} text    Text to escape
+ * @return {String}         Escaped text
+ */
+function escapeSlackText(text) {
+    if (typeof text !== 'string') {
+        return text;
+    }
+
+    const escapeMap = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;'
+    };
+
+    return text.replace(/[&<>]/g, char => escapeMap[char]);
+}
+
 // This should match what is in https://github.com/screwdriver-cd/data-schema/blob/master/models/build.js#L14
 // https://github.com/screwdriver-cd/ui/blob/master/app/styles/screwdriver-colors.scss
 const COLOR_MAP = {
@@ -169,10 +192,11 @@ function buildStatus(buildData, config) {
         : buildData.buildLink.split('/builds')[0];
     const truncatedSha = buildData.event.sha.slice(0, 6);
     const cutOff = 150;
-    const commitMessage =
+    const commitMessage = escapeSlackText(
         buildData.event.commit.message.length > cutOff
             ? `${buildData.event.commit.message.substring(0, cutOff)}...`
-            : buildData.event.commit.message;
+            : buildData.event.commit.message
+    );
 
     // Slack channel overwrite from meta data. Job specific only.
     const metaMinimizedReplaceVar = `build.meta.notification.slack.${buildData.jobName}.minimized`;
@@ -228,7 +252,7 @@ function buildStatus(buildData, config) {
                   // eslint-disable-next-line max-len
                   text:
                       `${commitMessage} (<${buildData.event.commit.url}|${truncatedSha}>)` +
-                      `\n${buildData.event.causeMessage}`
+                      `\n${escapeSlackText(buildData.event.causeMessage)}`
               }
           ];
 
